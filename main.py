@@ -11,6 +11,8 @@ import xml.etree.ElementTree
 
 import youtube_dl
 
+from youtubesearchpython import *
+
 ALPHANUM_RE = re.compile('[^a-zA-Z]')
 
 def splitTrack(inFile,
@@ -33,11 +35,12 @@ def splitTrack(inFile,
 
 def main(inVideoUrlStr):
 
-    start = time.time()
+
 
     queryOptsDict = {
         'extractaudio': True,
-        'format': 'worstaudio'
+        'format': 'worstaudio',
+        'quiet':True
     }
 
     # todo! add a check if no subtitles
@@ -50,6 +53,11 @@ def main(inVideoUrlStr):
     alpNumSongTitle = ALPHANUM_RE.sub('', songTitle)
     ext       = videoInfo["ext"]
     fileName  = '{0}.{1}'.format(alpNumSongTitle, ext)
+
+    subtitles = videoInfo.get('subtitles', {})
+    print(subtitles.keys())
+
+    return
 
     downloadOptsDict = {
         'extractaudio': True,
@@ -72,6 +80,8 @@ def main(inVideoUrlStr):
     subtitles = videoInfo.get('subtitles')
 
     validSubtitleFormats = ('srv1', 'srv2', 'srv3')
+
+
 
     for lang, subList in subtitles.items():
 
@@ -121,7 +131,16 @@ def main(inVideoUrlStr):
     for thread in threads:
         thread.join()
 
-    end = time.time()
-    print(end - start)
 
-main('https://www.youtube.com/watch?v=aYmChPWJXyo&ab_channel=TianaMarie')
+start = time.time()
+
+videosSearch =  CustomSearch('francais', 'EgYYAygBMAE%253D', limit = 100, language = 'fr')
+
+for x in videosSearch.result()['result']:
+    print('#' * 80)
+    print(x['title'])
+    main(x['link'])
+    print('#' * 80)
+
+end = time.time()
+print(end - start)
