@@ -1,0 +1,31 @@
+<html>
+    <body>
+        <p>
+            <form method="POST" action="{{ url_for('browse') }}">
+            {{ searchVideoForm.csrf_token }}
+            <p>
+                {{ searchVideoForm.searchQuery(size=32, autocomplete="off") }}
+            </p>
+            <p>
+                {{ searchVideoForm.language(size=32, autocomplete="off") }}
+            </p>
+            <p>
+                {% for error in searchVideoForm.searchQuery.errors %}
+                    {{ error }}
+                {% endfor %}
+            </p>
+            <p>
+                <input type="submit" name='btn'>
+            </p>
+            </form>
+        </p>
+
+        {% if searchResults %}
+            {% for videoInfo in searchResults %}
+                <li><a href="{{ videoInfo['link'] }}">{{ videoInfo["title"] }}</a></li>
+            {% endfor %}
+        {% endif %}
+
+        <p></p>
+    </body>
+</html>

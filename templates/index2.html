@@ -1,0 +1,35 @@
+<html>
+    <body>
+        <p>{{ inCurrentTitle }}</p>
+        <p>
+            {% if isConfirm %}
+                <form method="POST" action="{{ url_for('index') }}">
+                    <p>
+                        {{ inVideoSubsForm.subtitles }}<br>
+                    </p>
+                    <p>
+                        {% for error in inVideoSubsForm.subtitles.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </p>
+                    <input type="submit" name='btn' value="Confirm video">
+                </form>
+            {% endif %}
+        </p>
+        <form method="POST" action="{{ url_for('index') }}">
+            {{ inVideoUrlForm.csrf_token }}
+            <p>
+                {{ inVideoUrlForm.url.label }}<br>
+                {{ inVideoUrlForm.url(size=32, autocomplete="off") }}
+            </p>
+            <p>
+                {% for error in inVideoUrlForm.url.errors %}
+                    {{ error }}
+                {% endfor %}
+            </p>
+            <p>
+                <input type="submit" name='btn' value="Add comment">
+            </p>
+        </form>
+    </body>
+</html>

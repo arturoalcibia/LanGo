@@ -57,8 +57,6 @@ def main(inVideoUrlStr):
     subtitles = videoInfo.get('subtitles', {})
     print(subtitles.keys())
 
-    return
-
     downloadOptsDict = {
         'extractaudio': True,
         'format'      : 'worstaudio',
@@ -132,6 +130,7 @@ def main(inVideoUrlStr):
         thread.join()
 
 
+'''
 start = time.time()
 
 videosSearch =  CustomSearch('francais', 'EgYYAygBMAE%253D', limit = 100, language = 'fr')
@@ -144,3 +143,23 @@ for x in videosSearch.result()['result']:
 
 end = time.time()
 print(end - start)
+'''
+start = time.time()
+
+ydl_opts = {}
+
+# todo! add a check if no subtitles
+with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    videoInfo = ydl.extract_info(
+        'https://www.youtube.com/watch?v=lQ_vZxPBEBw&t=115s&ab_channel=Fran%C3%A7aisAuthentique',
+        download=False)
+
+    for language, subInfo in videoInfo.get('subtitles', {}).items():
+        print(language)
+
+'''
+end = time.time()
+print(end - start)
+
+print(isinstance(2, int))
+'''
