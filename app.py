@@ -4,6 +4,7 @@ from flask import render_template
 from flask import session
 from flask import url_for
 
+import constants
 from forms.videoUrl import VideoUrlForm
 from forms.videoSubtitles import VideoSubtitlesForm
 from forms.searchVideo import SearchVideoForm
@@ -27,8 +28,11 @@ def index():
 
     return render_template("index.html")
 
-@app.route('/browse', methods=('GET', 'POST'))
-def browse():
+@app.route('/browse/<query>/<language>')
+@app.route('/browse/<query>/')
+@app.route('/browse/')
+def browse(query=None,
+           language=None):
     '''If guest:  let them browse videos.
 
     elif user: All of the above plus >
@@ -41,23 +45,25 @@ def browse():
     '''
     searchVideoForm = SearchVideoForm()
 
-    if searchVideoForm.validate_on_submit():
-
-        searchQueryData = searchVideoForm.searchQuery.data
-        languageData = searchVideoForm.language.data
-        videosSearch = youtube.search(searchQueryData, languageData)
-
+    if query is None:
         return render_template('browse.html',
-                               searchVideoForm=searchVideoForm,
-                               searchResults=videosSearch)
+                               searchVideoForm=searchVideoForm)
+
+    if language is not None:
+        searchResults = youtube.search(query, inLanguageCode=language)
+    else:
+        searchResults = youtube.search(query)
 
     return render_template('browse.html',
-                           searchVideoForm=searchVideoForm)
+                           searchVideoForm=searchVideoForm,
+                           searchResults=searchResults)
 
-@app.route('/exercise', methods=('GET', 'POST'))
-def exercise():
-    searchVideoForm = SearchVideoForm()
-    return render_template('exercise.html')
+@app.route('/exercise/<videoId>/<language>')
+def exercise(videoId=None,
+             inLanguageCode=None):
+
+    if youtube.isIdValid(videoId, inLanguageCode):
+        return render_template('exercise.html')
 
 @app.route("/test", methods=("GET", "POST"))
 def addVideo():

@@ -8,6 +8,6 @@ class SearchVideoForm(FlaskForm):
     searchQuery = StringField('Search query',
                               validators=[DataRequired()])
     language = SelectField('language',
-                           choices=constants.ISO_LANGUAGE_CODE_MAPPING.keys())
+                           choices=constants.LANGUAGE_ISO_CODE_MAPPING.keys())
     submit = SubmitField('Search')
 

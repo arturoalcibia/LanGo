@@ -1,4 +1,4 @@
-import threading
+import requests
 
 import youtube_dl
 from youtubesearchpython import *
@@ -6,24 +6,17 @@ from youtubesearchpython import *
 import constants
 
 def getVideoInfo(inYoutubeLink,
-                 inLanguage,
-                 inFallbackToRoot=True):
+                 inLanguageCode=None):
     # todo: naming is not the best!
+    # todo! this is being repeated
     # Some videos that are about to go live will error.
-
     try:
         with youtube_dl.YoutubeDL({}) as ydl:
             videoInfo = ydl.extract_info(inYoutubeLink, download=False)
 
-            if not isLanguageRequested(videoInfo['subtitles'].keys(),
-                                       inLanguage,
-                                       inFallbackToRoot=inFallbackToRoot):
+            if inLanguageCode is not None and not isLanguageRequested(videoInfo['subtitles'].keys(),
+                                                                      inLanguageCode):
                 return
-
-            print('######################################')
-            print(inLanguage)
-            print(videoInfo['subtitles'].keys())
-            print('######################################')
 
             return {'link': inYoutubeLink,
                     'title': videoInfo['title']}
@@ -33,77 +26,63 @@ def getVideoInfo(inYoutubeLink,
         return None
 
 def isLanguageRequested(inVideoLanguages,
-                        inRequestedLanguageStr,
-                        inFallbackToRoot=True):
+                        inRequestedCodeLanguage):
     '''Checks if video corresponds to requested subtitle language.
-
-    Args:
-
-        inFallbackToRoot: If "Spanish (Mexico)" is requested, will also consider
-        "Spanish" as valid.
     '''
-    inVideoLanguages = [lang.lower() for lang in inVideoLanguages]
 
-    languageCode = constants.ISO_LANGUAGE_CODE_MAPPING[inRequestedLanguageStr]
+    # Ex: convert 'Es-Mx' to 'es'
+    inVideoLanguages = [lang.lower().split('-')[0] for lang in inVideoLanguages]
 
-    if languageCode in inVideoLanguages:
+    return inRequestedCodeLanguage in inVideoLanguages
+
+def isIdValid(inYoutubeId,
+              inLanguageCode=None):
+
+    requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
+        inYoutubeId)
+    requestObj = requests.get(url=requestUrl)
+
+    # Match if video is available/ not private/ exists.
+    if not requestObj.status_code != '200':
+        return False
+
+    if requestObj.text == 'Unauthorized':
+        return False
+
+    link = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
+
+    videoInfoKwargs = {}
+
+    if inLanguageCode:
+        inLanguage = constants.ISO_CODE_LANGUAGE_MAPPING[inLanguageCode]
+        videoInfoKwargs['inLanguageCode'] = inLanguage
+
+    videoInfo = getVideoInfo(link, **videoInfoKwargs)
+
+    if videoInfo:
         return True
 
-    if inFallbackToRoot:
-        languageCode = languageCode.split('-')
-
-        if len(languageCode) != 2:
-            return False
-
-        genericLangs = set()
-
-        for lang in inVideoLanguages:
-
-            splitLang = lang.split('-')
-
-            if len(splitLang) == 2:
-                genericLangs.add(splitLang[0])
-                continue
-
-            genericLangs.add(lang)
-
-        # Ex: 'fr-ca' to 'fr'
-        if languageCode[0] in inVideoLanguages:
-            return True
-
-    return False
-
 def search(inSearchStr,
-           inLanguage,
+           inLanguageCode=None,
            inLimit=constants.SEARCH_LIMIT):
 
     searchResults = []
     retryCounter = 0
 
-
     ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=inLimit)
-
-    threads = []
 
     while not searchResults and retryCounter < constants.SEARCH_LIMIT:
         for videoInfoDict in ytSearch.result()['result']:
 
-
             link = 'https://www.youtube.com/watch?v={0}'.format(videoInfoDict['id'])
-            '''
-            # todo: threading@!
-            thread = threading.Thread(target=getVideoInfo, args=(link, inLanguage))
-            threads.append(thread)
-            thread.start()
-            '''
 
-            videoInfo = getVideoInfo(link, inLanguage, inFallbackToRoot=True)
+            videoInfo = getVideoInfo(link, inLanguageCode=inLanguageCode)
+
+            print(videoInfo)
             if videoInfo:
                 searchResults.append(videoInfo)
-
 
         retryCounter += 1
         ytSearch.next()
 
     return searchResults
-
