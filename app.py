@@ -3,6 +3,7 @@ from flask import redirect
 from flask import render_template
 from flask import session
 from flask import url_for
+from flask import request
 
 import constants
 from forms.videoUrl import VideoUrlForm
@@ -28,9 +29,9 @@ def index():
 
     return render_template("index.html")
 
-@app.route('/browse/<query>/<language>')
-@app.route('/browse/<query>/')
-@app.route('/browse/')
+@app.route('/browse/<query>/<language>', methods=("GET", "POST"))
+@app.route('/browse/<query>/', methods=("GET", "POST"))
+@app.route('/browse/', methods=("GET", "POST"))
 def browse(query=None,
            language=None):
     '''If guest:  let them browse videos.
@@ -45,6 +46,13 @@ def browse(query=None,
     '''
     searchVideoForm = SearchVideoForm()
 
+    if searchVideoForm.validate_on_submit():
+        searchQueryData = searchVideoForm.searchQuery.data
+        languageData = searchVideoForm.language.data
+        languageCode = constants.LANGUAGE_ISO_CODE_MAPPING[languageData]
+
+        return redirect(url_for('browse', query=searchQueryData, language=languageCode))
+
     if query is None:
         return render_template('browse.html',
                                searchVideoForm=searchVideoForm)
@@ -54,16 +62,20 @@ def browse(query=None,
     else:
         searchResults = youtube.search(query)
 
+
     return render_template('browse.html',
                            searchVideoForm=searchVideoForm,
-                           searchResults=searchResults)
+                           searchResults=searchResults,
+                           languageCode=language)
 
-@app.route('/exercise/<videoId>/<language>')
+@app.route('/exercise/<videoId>/<languageCode>')
 def exercise(videoId=None,
-             inLanguageCode=None):
+             languageCode=None):
 
-    if youtube.isIdValid(videoId, inLanguageCode):
-        return render_template('exercise.html')
+    if youtube.isIdValid(videoId, languageCode):
+        return render_template('exercise.html', videoId=videoId, languageCode=languageCode)
+
+    return render_template('exercise.html', videoId=videoId)
 
 @app.route("/test", methods=("GET", "POST"))
 def addVideo():

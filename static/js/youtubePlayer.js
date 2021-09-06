@@ -1,4 +1,3 @@
-var videoId = 'vDHtypVwbHQ';
 var startSeconds = 4.5;
 var endSeconds = 5;
 var firstTime = true;
@@ -14,7 +13,7 @@ var playerConfig = {
   videoId: videoId,
   playerVars: {
     autoplay: 0, // Auto-play the video on load
-    mute: 1, // Auto-play the video on loa
+    mute: 0, // Auto-play the video on loa
     controls: 0, // Show pause/play buttons in player
     showinfo: 0, // Hide the video title
     modestbranding: 1, // Hide the Youtube Logo

@@ -22,7 +22,11 @@
 
         {% if searchResults %}
             {% for videoInfo in searchResults %}
-                <li><a href="{{ videoInfo['link'] }}">{{ videoInfo["title"] }}</a></li>
+                <!-- todo! can be improved -->
+            {% set videoId = videoInfo['id'] %}
+            {% if languageCode %}
+                <li><a href="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">{{ videoInfo["title"] }}</a></li>
+            {% endif %}
             {% endfor %}
         {% endif %}
 

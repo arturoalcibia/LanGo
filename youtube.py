@@ -19,7 +19,8 @@ def getVideoInfo(inYoutubeLink,
                 return
 
             return {'link': inYoutubeLink,
-                    'title': videoInfo['title']}
+                    'title': videoInfo['title'],
+                    'id': videoInfo['id']}
 
     except:
         # todo! narrow down?
@@ -78,7 +79,6 @@ def search(inSearchStr,
 
             videoInfo = getVideoInfo(link, inLanguageCode=inLanguageCode)
 
-            print(videoInfo)
             if videoInfo:
                 searchResults.append(videoInfo)
 
@@ -86,3 +86,5 @@ def search(inSearchStr,
         ytSearch.next()
 
     return searchResults
+
+getVideoInfo('https://www.youtube.com/watch?v=5MgBikgcWnY')

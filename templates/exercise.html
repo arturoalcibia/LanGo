@@ -5,5 +5,10 @@
   <input type="checkbox" id="isLoop"><label for="isLoop">Loop</label><br>
 </div>
 
+<script type="text/javascript">
+    var videoId = '{{ videoId }}';
+</script>
+
 <script type="text/javascript"
-        src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>
+        src="{{ url_for('static', filename="js/youtubePlayer.js") }}">
+</script>
