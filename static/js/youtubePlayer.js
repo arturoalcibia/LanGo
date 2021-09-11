@@ -1,5 +1,5 @@
 var startSeconds = 4.5;
-var endSeconds = 5;
+var endSeconds = 1;
 var firstTime = true;
 
 var playPauseButton = document.getElementById("playPauseButton");

@@ -1,5 +1,16 @@
 <html>
     <body>
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+        <link rel="stylesheet" href="/resources/demos/style.css">
+        <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script>
+          $( function() {
+            $( "#language" ).autocomplete({
+              source: {{ languages | tojson }}
+            });
+          } );
+          </script>
         <p>
             <form method="POST" action="{{ url_for('browse') }}">
             {{ searchVideoForm.csrf_token }}
@@ -7,10 +18,15 @@
                 {{ searchVideoForm.searchQuery(size=32, autocomplete="off") }}
             </p>
             <p>
+                {% for error in searchVideoForm.searchQuery.errors %}
+                    {{ error }}
+                {% endfor %}
+            </p>
+            <p>
                 {{ searchVideoForm.language(size=32, autocomplete="off") }}
             </p>
             <p>
-                {% for error in searchVideoForm.searchQuery.errors %}
+                {% for error in searchVideoForm.language.errors %}
                     {{ error }}
                 {% endfor %}
             </p>
@@ -24,9 +40,7 @@
             {% for videoInfo in searchResults %}
                 <!-- todo! can be improved -->
             {% set videoId = videoInfo['id'] %}
-            {% if languageCode %}
-                <li><a href="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">{{ videoInfo["title"] }}</a></li>
-            {% endif %}
+            <li><a href="{{ url_for('exercise', videoId=videoId) }}">{{ videoInfo["title"] }}</a></li>
             {% endfor %}
         {% endif %}
 

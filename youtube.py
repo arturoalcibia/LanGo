@@ -14,8 +14,8 @@ def getVideoInfo(inYoutubeLink,
         with youtube_dl.YoutubeDL({}) as ydl:
             videoInfo = ydl.extract_info(inYoutubeLink, download=False)
 
-            if inLanguageCode is not None and not isLanguageRequested(videoInfo['subtitles'].keys(),
-                                                                      inLanguageCode):
+            if inLanguageCode and not isLanguageRequested(videoInfo['subtitles'].keys(),
+                                                          inLanguageCode):
                 return
 
             return {'link': inYoutubeLink,
@@ -38,17 +38,18 @@ def isLanguageRequested(inVideoLanguages,
 
 def isIdValid(inYoutubeId,
               inLanguageCode=None):
-
     requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
         inYoutubeId)
     requestObj = requests.get(url=requestUrl)
 
-    # Match if video is available/ not private/ exists.
+    # Match if video is not available/private/exists.
     if not requestObj.status_code != '200':
         return False
 
     if requestObj.text == 'Unauthorized':
         return False
+
+    print(requestObj.text)
 
     link = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
 
@@ -58,10 +59,7 @@ def isIdValid(inYoutubeId,
         inLanguage = constants.ISO_CODE_LANGUAGE_MAPPING[inLanguageCode]
         videoInfoKwargs['inLanguageCode'] = inLanguage
 
-    videoInfo = getVideoInfo(link, **videoInfoKwargs)
-
-    if videoInfo:
-        return True
+    return bool(getVideoInfo(link, **videoInfoKwargs))
 
 def search(inSearchStr,
            inLanguageCode=None,
@@ -87,4 +85,8 @@ def search(inSearchStr,
 
     return searchResults
 
-getVideoInfo('https://www.youtube.com/watch?v=5MgBikgcWnY')
+
+link = 'https://www.youtube.com/watch?v=SIajZbr3J8k'
+with youtube_dl.YoutubeDL({}) as ydl:
+    videoInfo = ydl.extract_info(link, download=False)
+    print(videoInfo['subtitles'])
