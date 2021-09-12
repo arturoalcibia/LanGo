@@ -7,6 +7,9 @@
 
 <script type="text/javascript">
     var videoId = '{{ videoId }}';
+    var startSeconds = {{ start or 0 }};
+    var endSeconds = {{ end  or 10 }};
+
 </script>
 
 <script type="text/javascript" src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>

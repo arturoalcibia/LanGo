@@ -103,15 +103,20 @@ def exercise(videoId=None,
 
         with urllib.request.urlopen(videoInfo['subtitles']) as response:
             subsXml = xml.etree.ElementTree.parse(response)
-
             root = subsXml.getroot()
+            child = root[progressInt]
+            text = child.text
+            subStart = float(child.attrib['start'])
+            subEnd = subStart + float(child.attrib['dur'])
 
         return render_template('exercise.html',
                                videoId=videoId,
                                languageCode=languageCode,
                                blankExerciseForm=blankExerciseForm,
                                inProgressInt=progressInt,
-                               currentSubtitle=root[progressInt].text)
+                               currentSubtitle=text,
+                               start=subStart,
+                               end=subEnd)
 
     return render_template('exercise.html',
                            videoId=videoId,
