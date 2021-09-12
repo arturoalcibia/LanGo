@@ -9,14 +9,19 @@
     var videoId = '{{ videoId }}';
 </script>
 
-<script type="text/javascript"
-        src="{{ url_for('static', filename="js/youtubePlayer.js") }}">
-</script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>
 
-<p>Two year ago, my life ______ forever.</p>
+<form method="POST" action="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">
+    {{ blankExerciseForm.hidden_tag() }}
+    <p>{{ blankExerciseForm.progress(value=inProgressInt, autocomplete="off") }}</p>
+    <p>
+        {% for error in blankExerciseForm.progress.errors %}
+            {{ error }}
+        {% endfor %}
+    </p>
+    <p>{{ blankExerciseForm.next() }}</p>
+</form>
 
-<p>A) TSADADF</p>
-<p>B) changed</p>
-<p>C) chebicholis</p>
-
-<button type="button">Next</button>
+{% if currentSubtitle %}
+    <p>{{ currentSubtitle }}</p>
+{% endif %}

@@ -1,3 +1,6 @@
+import urllib.request
+import xml.etree.ElementTree
+
 from flask import Flask
 from flask import redirect
 from flask import render_template
@@ -7,6 +10,8 @@ from flask import request
 
 import constants
 from forms.searchVideo import SearchVideoForm
+from forms.exercise import BlankExerciseForm
+from forms.exerciseSettings import ExerciseSettingsForm
 
 import youtube
 
@@ -42,6 +47,7 @@ def browse(query=None,
         Common header
         | LanGO | Browse videos | Browse playlists | User profile
     '''
+
     searchVideoForm = SearchVideoForm()
 
     languagesNames = list(constants.LANGUAGE_ISO_CODE_MAPPING.keys())
@@ -72,15 +78,46 @@ def browse(query=None,
                            languageCode=language,
                            languages=languagesNames)
 
-@app.route('/exercise/<videoId>/<languageCode>')
-@app.route('/exercise/<videoId>/')
+@app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
+@app.route('/exercise/<videoId>', methods=("GET", "POST"))
 def exercise(videoId=None,
              languageCode=None):
-    if youtube.isIdValid(videoId, languageCode):
-        return render_template('exercise.html', videoId=videoId, languageCode=languageCode)
 
-    #todo! render template for invalid videoId
-    return 'Not valid url'
+    #todo! enable
+
+    #todo! handle when not providing languageCode here and on videoInfo
+    # todo! Cache it! alternatives: session/flask cache rnd
+    videoInfo = youtube.getVideoInfo(videoId,
+                                     languageCode,
+                                     inCheckValidIdBool=True)
+
+    if not videoInfo:
+        return 'Not valid url'
+
+
+    blankExerciseForm = BlankExerciseForm()
+
+    if blankExerciseForm.validate_on_submit():
+        progressInt = blankExerciseForm.progress.data or 0
+        progressInt += 1
+
+        with urllib.request.urlopen(videoInfo['subtitles']) as response:
+            subsXml = xml.etree.ElementTree.parse(response)
+
+            root = subsXml.getroot()
+
+        return render_template('exercise.html',
+                               videoId=videoId,
+                               languageCode=languageCode,
+                               blankExerciseForm=blankExerciseForm,
+                               inProgressInt=progressInt,
+                               currentSubtitle=root[progressInt].text)
+
+    return render_template('exercise.html',
+                           videoId=videoId,
+                           languageCode=languageCode,
+                           blankExerciseForm=blankExerciseForm,
+                           inProgressInt=0)
 
 
 if __name__ == "__main__":

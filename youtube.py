@@ -5,36 +5,57 @@ from youtubesearchpython import *
 
 import constants
 
-def getVideoInfo(inYoutubeLink,
-                 inLanguageCode=None):
+def getVideoInfo(inYoutubeId,
+                 inLanguageCode=None,
+                 inCheckValidIdBool=False):
+
+    if inCheckValidIdBool and not isIdValid(inYoutubeId):
+        return
+
     # todo: naming is not the best!
     # todo! this is being repeated
+
     # Some videos that are about to go live will error.
     try:
         with youtube_dl.YoutubeDL({}) as ydl:
-            videoInfo = ydl.extract_info(inYoutubeLink, download=False)
 
-            if inLanguageCode and not isLanguageRequested(videoInfo['subtitles'].keys(),
-                                                          inLanguageCode):
-                return
+            #todo! move to specific fn.
+            youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
 
-            return {'link': inYoutubeLink,
-                    'title': videoInfo['title'],
-                    'id': videoInfo['id']}
+            videoInfo = ydl.extract_info(youtubeLink, download=False)
+
+            videoInfoDict = {'link': youtubeLink,
+                             'title': videoInfo['title'],
+                             'id': videoInfo['id']}
+
+            if inLanguageCode:
+
+                closestLanguage = getClosestLanguage(
+                    videoInfo['subtitles'].keys(),
+                    inLanguageCode)
+
+                if not closestLanguage:
+                    return
+
+                videoInfoDict['subtitles'] = videoInfo['subtitles'][closestLanguage][0]['url']
+
+            return videoInfoDict
 
     except:
         # todo! narrow down?
-        return None
+        return
 
-def isLanguageRequested(inVideoLanguages,
-                        inRequestedCodeLanguage):
-    '''Checks if video corresponds to requested subtitle language.
+def getClosestLanguage(inVideoLanguages,
+                       inRequestedCodeLanguage):
+    '''Get closest language
+    todo!
     '''
+    for videoLangCode in inVideoLanguages:
 
-    # Ex: convert 'Es-Mx' to 'es'
-    inVideoLanguages = [lang.lower().split('-')[0] for lang in inVideoLanguages]
+        # Ex: convert 'Es-Mx' to 'es', return first match.
+        if inRequestedCodeLanguage == videoLangCode.lower().split('-')[0]:
+            return videoLangCode
 
-    return inRequestedCodeLanguage in inVideoLanguages
 
 def isIdValid(inYoutubeId,
               inLanguageCode=None):
@@ -59,7 +80,7 @@ def isIdValid(inYoutubeId,
         inLanguage = constants.ISO_CODE_LANGUAGE_MAPPING[inLanguageCode]
         videoInfoKwargs['inLanguageCode'] = inLanguage
 
-    return bool(getVideoInfo(link, **videoInfoKwargs))
+    return bool(getVideoInfo(inYoutubeId, **videoInfoKwargs))
 
 def search(inSearchStr,
            inLanguageCode=None,
@@ -73,9 +94,7 @@ def search(inSearchStr,
     while not searchResults and retryCounter < constants.SEARCH_LIMIT:
         for videoInfoDict in ytSearch.result()['result']:
 
-            link = 'https://www.youtube.com/watch?v={0}'.format(videoInfoDict['id'])
-
-            videoInfo = getVideoInfo(link, inLanguageCode=inLanguageCode)
+            videoInfo = getVideoInfo(videoInfoDict['id'], inLanguageCode=inLanguageCode)
 
             if videoInfo:
                 searchResults.append(videoInfo)
@@ -85,8 +104,3 @@ def search(inSearchStr,
 
     return searchResults
 
-
-link = 'https://www.youtube.com/watch?v=SIajZbr3J8k'
-with youtube_dl.YoutubeDL({}) as ydl:
-    videoInfo = ydl.extract_info(link, download=False)
-    print(videoInfo['subtitles'])

@@ -10,9 +10,8 @@
               source: {{ languages | tojson }}
             });
           } );
-          </script>
-        <p>
-            <form method="POST" action="{{ url_for('browse') }}">
+        </script>
+        <form method="POST" action="{{ url_for('browse') }}">
             {{ searchVideoForm.csrf_token }}
             <p>
                 {{ searchVideoForm.searchQuery(size=32, autocomplete="off") }}
@@ -30,17 +29,17 @@
                     {{ error }}
                 {% endfor %}
             </p>
-            <p>
-                <input type="submit" name='btn'>
-            </p>
-            </form>
-        </p>
-
+        <p>{{ searchVideoForm.submit() }}</p>
+        </form>
         {% if searchResults %}
             {% for videoInfo in searchResults %}
                 <!-- todo! can be improved -->
             {% set videoId = videoInfo['id'] %}
-            <li><a href="{{ url_for('exercise', videoId=videoId) }}">{{ videoInfo["title"] }}</a></li>
+            {% if languageCode %}
+                <li><a href="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">{{ videoInfo["title"] }}</a></li>
+            {% else %}
+                <li><a href="{{ url_for('exercise', videoId=videoId) }}">{{ videoInfo["title"] }}</a></li>
+            {% endif %}
             {% endfor %}
         {% endif %}
 
