@@ -1,8 +1,8 @@
 # Number of videos to display when browsing.
-SEARCH_LIMIT = 5
+SEARCH_LIMIT = 1
 
 # Number of times to retry a query if no videos are found.
-RETRY_LIMIT = 3
+RETRY_LIMIT = 1
 
 # Long name of language as key
 # and language code as extracted from youtube-dl subtitles as value.

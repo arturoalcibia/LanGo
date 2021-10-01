@@ -3,6 +3,7 @@ import xml.etree.ElementTree
 
 from flask import Flask
 from flask import redirect
+from flask import jsonify
 from flask import render_template
 from flask import session
 from flask import url_for
@@ -32,11 +33,11 @@ def index():
 
     return render_template("index.html")
 
-@app.route('/browse/<query>/<language>', methods=("GET", "POST"))
+@app.route('/browse/<query>/<languageCode>', methods=("GET", "POST"))
 @app.route('/browse/<query>/', methods=("GET", "POST"))
 @app.route('/browse/', methods=("GET", "POST"))
 def browse(query=None,
-           language=None):
+           languageCode=None):
     '''If guest:  let them browse videos.
 
     elif user: All of the above plus >
@@ -49,7 +50,6 @@ def browse(query=None,
     '''
 
     searchVideoForm = SearchVideoForm()
-
     languagesNames = list(constants.LANGUAGE_ISO_CODE_MAPPING.keys())
 
     if searchVideoForm.validate_on_submit():
@@ -58,7 +58,7 @@ def browse(query=None,
         languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(languageData)
 
         if languageCode:
-            return redirect(url_for('browse', query=searchQueryData, language=languageCode))
+            return redirect(url_for('browse', query=searchQueryData, languageCode=languageCode))
         else:
             return redirect(url_for('browse', query=searchQueryData))
 
@@ -67,23 +67,21 @@ def browse(query=None,
                                languages=languagesNames,
                                searchVideoForm=searchVideoForm)
 
-    if language is not None:
-        searchResults = youtube.search(query, inLanguageCode=language)
+    if languageCode is not None:
+        searchResults = youtube.search(query, inLanguageCode=languageCode)
     else:
         searchResults = youtube.search(query)
 
     return render_template('browse.html',
                            searchVideoForm=searchVideoForm,
                            searchResults=searchResults,
-                           languageCode=language,
+                           languageCode=languageCode,
                            languages=languagesNames)
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
-@app.route('/exercise/<videoId>', methods=("GET", "POST"))
+@app.route('/exercise/<videoId>/', methods=("GET", "POST"))
 def exercise(videoId=None,
              languageCode=None):
-
-    #todo! enable
 
     #todo! handle when not providing languageCode here and on videoInfo
     # todo! Cache it! alternatives: session/flask cache rnd
@@ -94,36 +92,16 @@ def exercise(videoId=None,
     if not videoInfo:
         return 'Not valid url'
 
+    #todo! do exercise page to choose language!!!
+    if languageCode is None:
+        return 'No provided language'
 
-    blankExerciseForm = BlankExerciseForm()
-
-    if blankExerciseForm.validate_on_submit():
-        progressInt = blankExerciseForm.progress.data or 0
-        progressInt += 1
-
-        with urllib.request.urlopen(videoInfo['subtitles']) as response:
-            subsXml = xml.etree.ElementTree.parse(response)
-            root = subsXml.getroot()
-            child = root[progressInt]
-            text = child.text
-            subStart = float(child.attrib['start'])
-            subEnd = subStart + float(child.attrib['dur'])
-
-        return render_template('exercise.html',
-                               videoId=videoId,
-                               languageCode=languageCode,
-                               blankExerciseForm=blankExerciseForm,
-                               inProgressInt=progressInt,
-                               currentSubtitle=text,
-                               start=subStart,
-                               end=subEnd)
+    subList = youtube.getSubtitlesList(videoInfo['subtitles'])
 
     return render_template('exercise.html',
                            videoId=videoId,
                            languageCode=languageCode,
-                           blankExerciseForm=blankExerciseForm,
-                           inProgressInt=0)
-
+                           subList=subList)
 
 if __name__ == "__main__":
     app.run()

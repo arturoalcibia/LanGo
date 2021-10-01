@@ -1,0 +1,9 @@
+.sub{
+    display: none;
+    background: rgba(126, 126, 126, 0.4);
+}
+
+.visible{
+    display: block;
+    background: rgba(1, 1, 1, 0.4);
+}

@@ -1,49 +1,13 @@
+import bisect
+import collections
 import requests
+import urllib.request
+import xml.etree.ElementTree
 
 import youtube_dl
 from youtubesearchpython import *
 
 import constants
-
-def getVideoInfo(inYoutubeId,
-                 inLanguageCode=None,
-                 inCheckValidIdBool=False):
-
-    if inCheckValidIdBool and not isIdValid(inYoutubeId):
-        return
-
-    # todo: naming is not the best!
-    # todo! this is being repeated
-
-    # Some videos that are about to go live will error.
-    try:
-        with youtube_dl.YoutubeDL({}) as ydl:
-
-            #todo! move to specific fn.
-            youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
-
-            videoInfo = ydl.extract_info(youtubeLink, download=False)
-
-            videoInfoDict = {'link': youtubeLink,
-                             'title': videoInfo['title'],
-                             'id': videoInfo['id']}
-
-            if inLanguageCode:
-
-                closestLanguage = getClosestLanguage(
-                    videoInfo['subtitles'].keys(),
-                    inLanguageCode)
-
-                if not closestLanguage:
-                    return
-
-                videoInfoDict['subtitles'] = videoInfo['subtitles'][closestLanguage][0]['url']
-
-            return videoInfoDict
-
-    except:
-        # todo! narrow down?
-        return
 
 def getClosestLanguage(inVideoLanguages,
                        inRequestedCodeLanguage):
@@ -56,31 +20,93 @@ def getClosestLanguage(inVideoLanguages,
         if inRequestedCodeLanguage == videoLangCode.lower().split('-')[0]:
             return videoLangCode
 
+def getSubtitleLanguages(inVideoId):
+    '''
+    '''
+    subVideoUrl = 'https://video.google.com/timedtext?v={0}&type=list'.format(inVideoId)
 
-def isIdValid(inYoutubeId,
-              inLanguageCode=None):
+    requestObj = requests.get(url=subVideoUrl)
+    languages = []
+
+    # Match if video is not available/private/exists.
+    if not requestObj.status_code != '200':
+        return None
+
+    for child in xml.etree.ElementTree.fromstring(requestObj.content).iter('*'):
+
+        if not child.tag == 'track':
+            continue
+
+        languages.append(child.attrib['lang_code'])
+
+    return languages
+
+def getSubtitlesList(inSubtitlesUrl):
+    with urllib.request.urlopen(inSubtitlesUrl) as response:
+        subsXml = xml.etree.ElementTree.parse(response)
+        subRoot = subsXml.getroot()
+        subs = []
+        for xmlElement in subRoot:
+            start = xmlElement.attrib['start']
+
+            # Used to precise display
+            startFloat = float(start)
+
+            subs.append({'end': round(float(xmlElement.attrib['dur']) + startFloat, 2),
+                         'start': startFloat,
+                         'text': xmlElement.text})
+
+        return subs
+
+def getVideoBasicInfo(inYoutubeId):
+    '''
+    todo!
+    Also checks if video is available to embed.
+    '''
     requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
         inYoutubeId)
     requestObj = requests.get(url=requestUrl)
 
     # Match if video is not available/private/exists.
     if not requestObj.status_code != '200':
-        return False
+        return None
 
     if requestObj.text == 'Unauthorized':
-        return False
+        return None
 
-    print(requestObj.text)
+    return requestObj.json()
 
-    link = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
+def getVideoInfo(inYoutubeId,
+                 inLanguageCode=None,
+                 inCheckValidIdBool=True):
 
-    videoInfoKwargs = {}
+    videoBasicInfo = getVideoBasicInfo(inYoutubeId)
+
+    if inCheckValidIdBool and not videoBasicInfo:
+        return
+
+    youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
+
+    videoInfoDict = {'link': youtubeLink,
+                     'title': videoBasicInfo['title'],
+                     'id': inYoutubeId}
 
     if inLanguageCode:
-        inLanguage = constants.ISO_CODE_LANGUAGE_MAPPING[inLanguageCode]
-        videoInfoKwargs['inLanguageCode'] = inLanguage
 
-    return bool(getVideoInfo(inYoutubeId, **videoInfoKwargs))
+        subtitleLanguages = getSubtitleLanguages(inYoutubeId)
+
+        closestLanguage = getClosestLanguage(
+            subtitleLanguages,
+            inLanguageCode)
+
+        if not closestLanguage:
+            return
+
+        videoInfoDict['subtitles'] = 'https://www.youtube.com/api/timedtext?lang={0}&v={1}'.format(
+            closestLanguage,
+            inYoutubeId)
+
+    return videoInfoDict
 
 def search(inSearchStr,
            inLanguageCode=None,
@@ -89,12 +115,21 @@ def search(inSearchStr,
     searchResults = []
     retryCounter = 0
 
-    ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=inLimit)
+    #todo! limit dooooo constant
+    ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=20)
 
-    while not searchResults and retryCounter < constants.SEARCH_LIMIT:
+    #todo! DOESNT STOP WHEN REACHED TO LIMIT
+    while len(searchResults) < inLimit or retryCounter < constants.RETRY_LIMIT:
         for videoInfoDict in ytSearch.result()['result']:
 
-            videoInfo = getVideoInfo(videoInfoDict['id'], inLanguageCode=inLanguageCode)
+            getVideoInfoKwargs = {}
+
+            if inLanguageCode:
+                getVideoInfoKwargs['inLanguageCode'] = inLanguageCode
+
+            videoInfo = getVideoInfo(videoInfoDict['id'],
+                                     inCheckValidIdBool=True,
+                                     **getVideoInfoKwargs)
 
             if videoInfo:
                 searchResults.append(videoInfo)

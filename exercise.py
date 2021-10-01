@@ -15,7 +15,6 @@ if __name__ == "__main__":
 
         return True
 
-
     videoInfo = youtube.getVideoInfo('bFrtwXpbR9s',
                                     constants.LANGUAGE_ISO_CODE_MAPPING['English'])
 

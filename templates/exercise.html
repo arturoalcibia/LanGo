@@ -1,30 +1,28 @@
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/subtitles.css') }}">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
 <div id="ytplayer"></div>
 
+{% for subDict in subList %}
+    <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
+        <span>{{ subDict["text"] }}</span>
+        <br>
+        <input class='inputSub' type="text" data-text="{{ subDict["text"] }}" autocomplete="off"/>
+    </div>
+{% endfor %}
+
 <div>
-  <button type="button" id="playPauseButton" style="visibility:hidden;">Play</button>
-  <input type="checkbox" id="isLoop"><label for="isLoop">Loop</label><br>
+    <p>Settings</p>
+    <p>Subtitles:</p>
+    <span>Before: </span><input type="text" id="beforeSettingsInput" autocomplete="off"/>
+    <br>
+    <span>After: </span><input type="text" id="afterSettingsInput" autocomplete="off"/>
 </div>
 
 <script type="text/javascript">
     var videoId = '{{ videoId }}';
-    var startSeconds = {{ start or 0 }};
-    var endSeconds = {{ end  or 10 }};
-
 </script>
 
+<script type="text/javascript" src="{{ url_for('static', filename="js/subtitlesDisplay.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/playerEvents.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>
-
-<form method="POST" action="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">
-    {{ blankExerciseForm.hidden_tag() }}
-    <p>{{ blankExerciseForm.progress(value=inProgressInt, autocomplete="off") }}</p>
-    <p>
-        {% for error in blankExerciseForm.progress.errors %}
-            {{ error }}
-        {% endfor %}
-    </p>
-    <p>{{ blankExerciseForm.next() }}</p>
-</form>
-
-{% if currentSubtitle %}
-    <p>{{ currentSubtitle }}</p>
-{% endif %}

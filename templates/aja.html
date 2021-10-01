@@ -1,0 +1,15 @@
+<p>hey</p>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+<script>
+  function ajax_follow(name) {
+    $.ajax({url: "/ajatest" + name, success: function(result){
+      if (result === 'success') {
+        $("#hell").text("Remove");
+      }
+    }});
+  }
+</script>
+
+<button id="follow" onclick="ajax_follow('{{tourist_attraction_name}}')">Add</button>
+<p id="hell">Add</p>

@@ -33,14 +33,17 @@
         </form>
         {% if searchResults %}
             {% for videoInfo in searchResults %}
-                <!-- todo! can be improved -->
-            {% set videoId = videoInfo['id'] %}
-            {% if languageCode %}
-                <li><a href="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">{{ videoInfo["title"] }}</a></li>
-            {% else %}
-                <li><a href="{{ url_for('exercise', videoId=videoId) }}">{{ videoInfo["title"] }}</a></li>
-            {% endif %}
+
+                {% set videoId = videoInfo['id'] %}
+
+                {% if languageCode %}
+                    <li><a href="{{ url_for('exercise', videoId=videoId, languageCode=languageCode) }}">{{ videoInfo["title"] }}</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('exercise', videoId=videoId) }}">{{ videoInfo["title"] }}</a></li>
+                {% endif %}
+
             {% endfor %}
+
         {% endif %}
 
         <p></p>
