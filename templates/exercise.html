@@ -1,5 +1,4 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/subtitles.css') }}">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 <div id="ytplayer"></div>
 
@@ -14,9 +13,11 @@
 <div>
     <p>Settings</p>
     <p>Subtitles:</p>
-    <span>Before: </span><input type="text" id="beforeSettingsInput" autocomplete="off"/>
+    <span>Before: </span><input type="range" min="0" max="5" step="1" id="beforeSettingsInput">
     <br>
-    <span>After: </span><input type="text" id="afterSettingsInput" autocomplete="off"/>
+    <span>After: </span><input type="range" min="0" max="5" step="1" id="afterSettingsInput">
+    <br>
+    <span>Loop until finished: </span><input type="checkbox" id="loopCheckBox">
 </div>
 
 <script type="text/javascript">
