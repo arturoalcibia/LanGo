@@ -1,12 +1,18 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/subtitles.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
 
 <div id="ytplayer"></div>
 
 {% for subDict in subList %}
     <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
-        <span>{{ subDict["text"] }}</span>
+        {% for textTuple in subDict["text"] %}
+            {% if textTuple[1] %}
+                <input class='inputSub' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
+            {% else %}
+                <span>{{ textTuple[0] }}</span>
+            {% endif %}
+        {% endfor %}
         <br>
-        <input class='inputSub' type="text" data-text="{{ subDict["text"] }}" autocomplete="off"/>
     </div>
 {% endfor %}
 
@@ -27,3 +33,4 @@
 <script type="text/javascript" src="{{ url_for('static', filename="js/subtitlesDisplay.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/playerEvents.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/inputValidation.js") }}"></script>

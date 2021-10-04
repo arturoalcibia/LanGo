@@ -1,13 +1,69 @@
-import bisect
-import collections
 import requests
 import urllib.request
 import xml.etree.ElementTree
 
-import youtube_dl
 from youtubesearchpython import *
 
 import constants
+# todo ! wtf
+import constant.spanish
+
+def __splitSentence(inSentence):
+
+    # List with a portion of the sentence as index 0
+    # and true if hint, false if blank as index 1.
+    # type: list[list[str, bool]]
+    wordTuples = []
+
+    # List to be used as an index to slice the sentence.
+    # type: list[int]
+    wordIndices = []
+
+    splittedSentence = inSentence.split(' ')
+
+    # Define if word will be a hint or blank.
+    lastIndex = 0
+    for index, word in enumerate(splittedSentence):
+        # Skip every other word.
+        if (index % 2) == 0:
+            continue
+
+        if word in constant.spanish.words:
+            wordIndices.append(index)
+
+    lastSlicedWordIndex = None
+    for listIndex, wordIndex in enumerate(wordIndices):
+
+        # If first iteration. Add first part of the string. If any. <<<
+        if listIndex == 0 and wordIndex > 0:
+            wordTuples.append(
+                (' '.join(splittedSentence[:wordIndex]),
+                 False))
+
+        if lastSlicedWordIndex is not None:
+
+            joinedSentence = None
+            wordIndexDifference = wordIndex - lastSlicedWordIndex
+
+            if wordIndexDifference > 2:
+                joinedSentence = ' '.join(splittedSentence[lastSlicedWordIndex + 1:wordIndex])
+
+            elif wordIndexDifference > 1:
+                joinedSentence = splittedSentence[lastSlicedWordIndex + 1]
+
+            if joinedSentence is not None:
+                wordTuples.append((joinedSentence, False))
+
+        wordTuples.append((splittedSentence[wordIndex], True))
+        lastSlicedWordIndex = wordIndex
+
+        # If last iteration, add last part of string. >>>
+        if listIndex + 1 == len(wordIndices):
+            wordTuples.append(
+                (' '.join(splittedSentence[wordIndex + 1:]),
+                 False))
+
+    return wordTuples
 
 def getClosestLanguage(inVideoLanguages,
                        inRequestedCodeLanguage):
@@ -42,19 +98,33 @@ def getSubtitleLanguages(inVideoId):
     return languages
 
 def getSubtitlesList(inSubtitlesUrl):
+    '''
+
+    Returns:
+         dict:
+            dict{'end'  : float ,
+                 'start': float ,
+                 'text' : [ [ str , bool ] ] }
+    '''
     with urllib.request.urlopen(inSubtitlesUrl) as response:
         subsXml = xml.etree.ElementTree.parse(response)
         subRoot = subsXml.getroot()
         subs = []
         for xmlElement in subRoot:
+
             start = xmlElement.attrib['start']
 
             # Used to precise display
             startFloat = float(start)
 
+            wordTuples = __splitSentence(xmlElement.text)
+
+            print(xmlElement.text)
+            print(wordTuples)
+
             subs.append({'end': round(float(xmlElement.attrib['dur']) + startFloat, 2),
                          'start': startFloat,
-                         'text': xmlElement.text})
+                         'text': wordTuples})
 
         return subs
 
@@ -139,3 +209,14 @@ def search(inSearchStr,
 
     return searchResults
 
+
+import time
+
+videoInfo = getVideoInfo('omGF6Ps9Nog', 'es')
+
+for x in range(10):
+    t0 = time.time()
+    getSubtitlesList(videoInfo['subtitles'])
+    t1 = time.time()
+    print(t1-t0)
+    break
