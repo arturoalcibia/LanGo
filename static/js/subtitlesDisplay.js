@@ -15,9 +15,6 @@ loopAnsweredCheckBox.checked = true;
 var skipAnsweredCheckBox = document.getElementById('skipAnsweredCheckBox');
 skipAnsweredCheckBox.checked = true;
 
-// Global vars:
-var lastSeekedSub = null;
-
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
   subtitleDiv = subtitlesDiv[i];
@@ -213,15 +210,6 @@ function displaySubtitles() {
   if (newCurrentSubtitle === null)
     return;
 
-  // If looped, in case player.seekTo call was to start plus some handles.
-  // Skip displaying any subtitles before the last start.
-  if (lastSeekedSub !== null){
-    if (newCurrentSubtitle !== lastSeekedSub)
-      return;
-
-    lastSeekedSub = null;
-  }
-
   var currentSubtitle = document.getElementById('current');
   var visibleSubs = document.getElementsByClassName('visible');
 
@@ -240,8 +228,6 @@ function displaySubtitles() {
         if (currentTime > endTime){
           // Skip any already answered subtitles.
           player.seekTo(startTime - 0.500);
-          // Keep reference of last seeked sub to avoid handles displaying any extra subtitle.
-          lastSeekedSub = newCurrentSubtitle;
           return
         }
 

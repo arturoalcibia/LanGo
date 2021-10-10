@@ -18,16 +18,20 @@
 
 <div>
     <p>Settings</p>
-    <p>Subtitles:</p>
-    <span>Before: </span><input type="range" min="0" max="5" step="1" id="beforeSettingsInput">
-    <br>
-    <span>After: </span><input type="range" min="0" max="5" step="1" id="afterSettingsInput">
-    <p>Loop until </p>
     <ul>
-      <li>All correct <input type="checkbox" id="loopCorrectCheckBox"> </li>
-      <li>All answered <input type="checkbox" id="loopAnsweredCheckBox"> </li>
+        <li>Subtitles:</li>
+        <ul>
+            <li>Before: <input type="range" min="0" max="5" step="1" id="beforeSettingsInput"></li>
+            <li>After: <input type="range" min="0" max="5" step="1" id="afterSettingsInput"></li>
+        </ul>
+        <li>Loop until </li>
+        <ul>
+            <li>All correct <input type="checkbox" id="loopCorrectCheckBox"> </li>
+            <li>All answered <input type="checkbox" id="loopAnsweredCheckBox"> </li>
+        </ul>
+        <li>Skip loop of answered lines: <input type="checkbox" id="skipAnsweredCheckBox"></li>
+        <li>Simple Answer mode (ä => a): <input type="checkbox" id="simpleAnswerModeCheckBox"></li>
     </ul>
-    <span>Skip loop of answered lines: </span><input type="checkbox" id="skipAnsweredCheckBox">
 </div>
 
 <script type="text/javascript">
