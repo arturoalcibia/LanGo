@@ -7,7 +7,7 @@
     <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
         {% for textTuple in subDict["text"] %}
             {% if textTuple[1] %}
-                <input class='inputSub' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
+                <input class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
             {% else %}
                 <span>{{ textTuple[0] }}</span>
             {% endif %}
@@ -22,8 +22,12 @@
     <span>Before: </span><input type="range" min="0" max="5" step="1" id="beforeSettingsInput">
     <br>
     <span>After: </span><input type="range" min="0" max="5" step="1" id="afterSettingsInput">
-    <br>
-    <span>Loop until finished: </span><input type="checkbox" id="loopCheckBox">
+    <p>Loop until </p>
+    <ul>
+      <li>All correct <input type="checkbox" id="loopCorrectCheckBox"> </li>
+      <li>All answered <input type="checkbox" id="loopAnsweredCheckBox"> </li>
+    </ul>
+    <span>Skip loop of answered lines: </span><input type="checkbox" id="skipAnsweredCheckBox">
 </div>
 
 <script type="text/javascript">

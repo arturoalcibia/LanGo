@@ -40,6 +40,7 @@ def __splitSentence(inSentence):
                 (' '.join(splittedSentence[:wordIndex]),
                  False))
 
+        # Add any previous leftover strings as hints. If any.
         if lastSlicedWordIndex is not None:
 
             joinedSentence = None
@@ -62,6 +63,10 @@ def __splitSentence(inSentence):
             wordTuples.append(
                 (' '.join(splittedSentence[wordIndex + 1:]),
                  False))
+
+    # If no words were added as blanks, add the whole sentence as hint.
+    if not wordTuples:
+        wordTuples.append((inSentence, False))
 
     return wordTuples
 
@@ -118,9 +123,6 @@ def getSubtitlesList(inSubtitlesUrl):
             startFloat = float(start)
 
             wordTuples = __splitSentence(xmlElement.text)
-
-            print(xmlElement.text)
-            print(wordTuples)
 
             subs.append({'end': round(float(xmlElement.attrib['dur']) + startFloat, 2),
                          'start': startFloat,
@@ -209,7 +211,7 @@ def search(inSearchStr,
 
     return searchResults
 
-
+'''
 import time
 
 videoInfo = getVideoInfo('omGF6Ps9Nog', 'es')
@@ -220,3 +222,4 @@ for x in range(10):
     t1 = time.time()
     print(t1-t0)
     break
+'''
