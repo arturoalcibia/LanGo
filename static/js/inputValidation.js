@@ -3,10 +3,16 @@ var inputSubtitles = document.getElementsByClassName("inputSub");
 var simpleAnswerModeCheckBox = document.getElementById("simpleAnswerModeCheckBox");
 simpleAnswerModeCheckBox.addEventListener('input', refreshAnswer);
 
+var scorePercentage = document.getElementById("scorePercentage");
+
 function refreshAnswer() {
   for (let i = 0; i < inputSubtitles.length; i++) {
     __validateAnswer(inputSubtitles[i]);
   }
+
+  let total = inputSubtitles.length;
+  let score = document.getElementsByClassName('correctInput').length;
+  scorePercentage.innerText = ((100 * score) / total).toFixed(1).toString();
 }
 
 for (let i = 0; i < inputSubtitles.length; i++) {
@@ -50,6 +56,7 @@ function __validateAnswer(inInputBox){
     inInputBox.classList.add('incorrectInput')
     inInputBox.classList.remove('correctInput')
   }
+
 }
 
 function validateAnswer(){

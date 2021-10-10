@@ -3,6 +3,10 @@
 
 <div id="ytplayer"></div>
 
+<div>
+    <p id="scorePercentage">Score: </p>
+</div>
+
 {% for subDict in subList %}
     <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
         {% for textTuple in subDict["text"] %}
