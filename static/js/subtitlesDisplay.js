@@ -8,18 +8,22 @@ beforeSettingsInput.addEventListener('input', refreshSubtitles);
 var afterSettingsInput  = document.getElementById("afterSettingsInput");
 afterSettingsInput.value = 0;
 afterSettingsInput.addEventListener('input', refreshSubtitles);
-var loopCorrectCheckBox = document.getElementById('loopCorrectCheckBox');
-loopCorrectCheckBox.checked = true;
-var loopAnsweredCheckBox = document.getElementById('loopAnsweredCheckBox');
-loopAnsweredCheckBox.checked = true;
+//todo: rename to loop over already answered?
 var skipAnsweredCheckBox = document.getElementById('skipAnsweredCheckBox');
 skipAnsweredCheckBox.checked = true;
+
+document.getElementById('noLoopRadio').checked = true;
 
 var previousSubtitleBtn = document.getElementById('previousSubtitleBtn');
 previousSubtitleBtn.addEventListener("click", goToPrevious);
 
 var nextSubtitleBtn = document.getElementById('nextSubtitleBtn');
 nextSubtitleBtn.addEventListener("click", goToNext );
+
+const noLoopRadio = 0
+const loopOnceRadio = 1
+const loopCorrectRadio = 2
+const loopAnsweredRadio = 3
 
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
@@ -255,29 +259,38 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
   var currentSubtitle = document.getElementById('current');
   var visibleSubs = document.getElementsByClassName('visible');
 
-  if ((loopAnsweredCheckBox.checked || loopCorrectCheckBox.checked) && visibleSubs.length > 0){
+  var loopStateInt = parseInt(document.querySelector('input[name="loop"]:checked').value);
 
-    if (loopAnsweredCheckBox.checked)
-      var startTime = __getStartTime(visibleSubs, skipAnsweredCheckBox.checked);
-    else if (loopCorrectCheckBox.checked)
-      var startTime = __getStartTime(visibleSubs, undefined, skipAnsweredCheckBox.checked);
+  if (( loopStateInt === loopOnceRadio ||
+        loopStateInt === loopCorrectRadio ||
+        loopStateInt === loopAnsweredRadio ) &&
+      visibleSubs.length > 0) {
 
-    // If already all answered subs, skip to next, no need to loop!
-      if (startTime !== null){
+    var endTime = __getEndTime(visibleSubs);
 
-        var endTime = __getEndTime(visibleSubs);
+    if (inCurrentTime > endTime){
 
-        if (inCurrentTime > endTime){
-          // Skip any already answered subtitles.
-          player.seekTo(startTime - 0.500);
-          return
+      if (loopStateInt === loopOnceRadio){
+        var startTime = __getStartTime(visibleSubs, undefined, undefined);
+        player.seekTo(startTime);
+        //delete callbacks?
+        player.pauseVideo();
+        __clearIntervals();
+        return;
         }
 
-        if (currentSubtitle !== newCurrentSubtitle)
-          return;
+      if (loopStateInt === loopCorrectRadio)
+        var startTime = __getStartTime(visibleSubs, false, true);
+      else if (loopStateInt === loopAnsweredRadio)
+        var startTime = __getStartTime(visibleSubs, true);
 
+      // If already all answered subs, skip to next, no need to loop!
+      if (startTime !== null){
+        // Skip any already answered subtitles.
+        player.seekTo(startTime);
+        return
       }
-
+    }
   }
 
   // Remove any visible subtitles

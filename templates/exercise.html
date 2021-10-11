@@ -33,8 +33,12 @@
             <li>Before: <input type="range" min="0" max="5" step="1" id="beforeSettingsInput"></li>
             <li>After: <input type="range" min="0" max="5" step="1" id="afterSettingsInput"></li>
         </ul>
-        <li>Loop until </li>
+        <li>Loop Options </li>
         <ul>
+            <input type="radio" id="noLoopRadio" name="loop" value="0"> No Loop
+            <input type="radio" id="loopOnceRadio" name="loop" value="1"> Play once
+            <input type="radio" id="loopCorrectRadio" name="loop" value="2"> Loop until all correct
+            <input type="radio" id="loopAnsweredRadio" name="loop" value="3"> Loop until all answered
             <li>All correct <input type="checkbox" id="loopCorrectCheckBox"> </li>
             <li>All answered <input type="checkbox" id="loopAnsweredCheckBox"> </li>
         </ul>
