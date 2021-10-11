@@ -6,7 +6,7 @@ var beforeSettingsInput = document.getElementById("beforeSettingsInput");
 beforeSettingsInput.value = 0;
 beforeSettingsInput.addEventListener('input', refreshSubtitles);
 var afterSettingsInput  = document.getElementById("afterSettingsInput");
-afterSettingsInput.value = 1;
+afterSettingsInput.value = 0;
 afterSettingsInput.addEventListener('input', refreshSubtitles);
 var loopCorrectCheckBox = document.getElementById('loopCorrectCheckBox');
 loopCorrectCheckBox.checked = true;
@@ -15,10 +15,52 @@ loopAnsweredCheckBox.checked = true;
 var skipAnsweredCheckBox = document.getElementById('skipAnsweredCheckBox');
 skipAnsweredCheckBox.checked = true;
 
+var previousSubtitleBtn = document.getElementById('previousSubtitleBtn');
+previousSubtitleBtn.addEventListener("click", goToPrevious);
+
+var nextSubtitleBtn = document.getElementById('nextSubtitleBtn');
+nextSubtitleBtn.addEventListener("click", goToNext );
+
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
   subtitleDiv = subtitlesDiv[i];
   inputChildren = subtitleDiv.getElementsByClassName('inputSub');
+}
+
+function __goTo(inPrevious=false){
+
+  // Remove any visible subtitles.
+  var currentSubtitle = document.getElementById('current');
+
+  // If no current subtitle, go to next one todo!
+  if (currentSubtitle === null)
+    return;
+
+  if (inPrevious)
+    newSub = tempSub.previousElementSibling;
+  else
+    newSub = tempSub.nextElementSibling;
+
+  startTime = parseFloat(newSub.dataset.start);
+
+  __clearIntervals();
+
+  var visibleSubs = document.getElementsByClassName('visible');
+  // Remove any visible subtitles
+  for (let i = 0; i < visibleSubs.length; i++)
+    visibleSubs[i].classList.remove('visible');
+
+  displaySubtitles(startTime);
+  player.seekTo(startTime);
+
+}
+
+function goToNext(){
+  __goTo();
+}
+
+function goToPrevious(){
+  __goTo(true);
 }
 
 function __clearVisible(subToSkip){
@@ -199,12 +241,12 @@ function __setVisibleNeighbours(inRange,
   }
 }
 
-function displaySubtitles() {
+function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
   // Called on an interval.
   // Function to display subtitles based on the current settings.
   currentTime = player.getCurrentTime();
 
-  var newCurrentSubtitle = __getSubFromTime(currentTime);
+  var newCurrentSubtitle = __getSubFromTime(inCurrentTime);
 
   // If no sub from time, no need to do any display calls.
   if (newCurrentSubtitle === null)
@@ -225,7 +267,7 @@ function displaySubtitles() {
 
         var endTime = __getEndTime(visibleSubs);
 
-        if (currentTime > endTime){
+        if (inCurrentTime > endTime){
           // Skip any already answered subtitles.
           player.seekTo(startTime - 0.500);
           return

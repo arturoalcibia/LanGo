@@ -7,13 +7,18 @@
     <p id="scorePercentage">Score: </p>
 </div>
 
+<div>
+    <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
+    <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
+</div>
+
 {% for subDict in subList %}
     <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
         {% for textTuple in subDict["text"] %}
             {% if textTuple[1] %}
                 <input class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
             {% else %}
-                <span>{{ textTuple[0] }}</span>
+                <span class="textSub">{{ textTuple[0] }}</span>
             {% endif %}
         {% endfor %}
         <br>
