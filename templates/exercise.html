@@ -28,6 +28,12 @@
 <div>
     <p>Settings</p>
     <ul>
+
+        <li> Speed:
+            <input type="radio" id="pointFiveRadio"  name="speedRadio" value="0.5"> 0.50 %
+            <input type="radio" id="pointSevenRadio" name="speedRadio" value="0.75"> 0.75 %
+            <input type="radio" id="oneRadio"        name="speedRadio" value="1"> Normal
+        </li>
         <li>Subtitles:</li>
         <ul>
             <li>Before: <input type="range" min="0" max="5" step="1" id="beforeSettingsInput"></li>
@@ -35,12 +41,12 @@
         </ul>
         <li>Loop Options </li>
         <ul>
-            <input type="radio" id="noLoopRadio" name="loop" value="0"> No Loop
-            <input type="radio" id="loopOnceRadio" name="loop" value="1"> Play once
-            <input type="radio" id="loopCorrectRadio" name="loop" value="2"> Loop until all correct
-            <input type="radio" id="loopAnsweredRadio" name="loop" value="3"> Loop until all answered
-            <li>All correct <input type="checkbox" id="loopCorrectCheckBox"> </li>
-            <li>All answered <input type="checkbox" id="loopAnsweredCheckBox"> </li>
+            <li>
+                <input type="radio" id="noLoopRadio" name="loop" value="0"> No Loop
+                <input type="radio" id="loopOnceRadio" name="loop" value="1"> Play once
+                <input type="radio" id="loopCorrectRadio" name="loop" value="2"> Loop until all correct
+                <input type="radio" id="loopAnsweredRadio" name="loop" value="3"> Loop until all answered
+            </li>
         </ul>
         <li>Skip loop of answered lines: <input type="checkbox" id="skipAnsweredCheckBox"></li>
         <li>Simple Answer mode (ä => a): <input type="checkbox" id="simpleAnswerModeCheckBox"></li>

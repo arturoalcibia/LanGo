@@ -1,3 +1,12 @@
+// Connect speed radio buttons.
+speedRadioBtns = document.getElementsByName('speedRadio')
+document.getElementById('oneRadio').checked = true;
+for(radio in speedRadioBtns) {
+    speedRadioBtns[radio].onclick = function() {
+        player.setPlaybackRate(parseFloat(this.value));
+    }
+}
+
 var intervals = [];
 
 function __clearIntervals(){
