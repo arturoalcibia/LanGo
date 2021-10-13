@@ -3,16 +3,16 @@ var subtitlesDiv = document.getElementsByClassName('sub');
 
 // Get settings
 var beforeSettingsInput = document.getElementById("beforeSettingsInput");
-beforeSettingsInput.value = 0;
+beforeSettingsInput.value = 1;
 beforeSettingsInput.addEventListener('input', refreshSubtitles);
 var afterSettingsInput  = document.getElementById("afterSettingsInput");
-afterSettingsInput.value = 0;
+afterSettingsInput.value = 1;
 afterSettingsInput.addEventListener('input', refreshSubtitles);
 //todo: rename to loop over already answered?
 var skipAnsweredCheckBox = document.getElementById('skipAnsweredCheckBox');
 skipAnsweredCheckBox.checked = true;
 
-document.getElementById('noLoopRadio').checked = true;
+document.getElementById('loopCorrectRadio').checked = true;
 
 var previousSubtitleBtn = document.getElementById('previousSubtitleBtn');
 previousSubtitleBtn.addEventListener("click", goToPrevious);
@@ -31,29 +31,57 @@ for (let i = 0; i < subtitlesDiv.length; i++) {
   inputChildren = subtitleDiv.getElementsByClassName('inputSub');
 }
 
-function __goTo(inPrevious=false){
-
-  // Remove any visible subtitles.
-  var currentSubtitle = document.getElementById('current');
-
-  // If no current subtitle, go to next one todo!
-  if (currentSubtitle === null)
-    return;
-
-  if (inPrevious)
-    newSub = tempSub.previousElementSibling;
-  else
-    newSub = tempSub.nextElementSibling;
-
-  startTime = parseFloat(newSub.dataset.start);
-
+function __goTo(inPrevious=false) {
   __clearIntervals();
-
+  // Remove any visible subtitles.
   var visibleSubs = document.getElementsByClassName('visible');
   // Remove any visible subtitles
   for (let i = 0; i < visibleSubs.length; i++)
     visibleSubs[i].classList.remove('visible');
 
+  // If no current subtitle, go to next one todo!
+  if (visibleSubs.length === 0)
+    return;
+
+  if (inPrevious){
+    newSub = visibleSubs[0].previousElementSibling;
+
+    tempSub = newSub;
+    for (let i = 0; i < beforeSettingsInput.value; i++) {
+
+      tempSub = tempSub.previousElementSibling;
+
+      if (tempSub === null)
+        break
+
+      newSub = tempSub;
+
+    }
+
+  }
+
+  else {
+    newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+
+    tempSub = newSub;
+    for (let i = 0; i < afterSettingsInput.value; i++) {
+
+      tempSub = tempSub.nextElementSibling;
+
+      if (tempSub === null)
+        break
+
+      newSub = tempSub;
+
+    }
+  }
+
+  startTime = parseFloat(newSub.dataset.start);
+  // Remove any visible subtitles
+  for (let i = 0; i < visibleSubs.length; i++)
+    visibleSubs[i].classList.remove('visible');
+
+  __clearCurrentSubtitle();
   displaySubtitles(startTime);
   player.seekTo(startTime);
 
@@ -96,22 +124,10 @@ function __getSubFromTime(inTime){
 
 }
 
-function __getStartTime(inSubs, skipAnswered = false, skipCorrect = false) {
+function __getStartTime(inSubs) {
   // Check if visible subtitles have been answered to define if subtitles should change!
-  for (let i = 0; i < inSubs.length; i++) {
-
-    inSub = inSubs[i];
-
-    if (skipAnswered && __isChildrenAnswered(inSub))
-      continue
-
-    else if (skipCorrect && __isChildrenCorrect(inSub))
-      continue
-
-    return inSub.dataset.start;
-  }
-
-  return null
+  for (let i = 0; i < inSubs.length; i++)
+    return inSubs[i].dataset.start;
 }
 
 function __getEndTime(inSubs){
@@ -161,54 +177,6 @@ function __isChildrenAnswered(inSub){
 
 }
 
-function __isEmptyInput(inSubs) {
-
-  // Check if visible subtitles have been answered to define if subtitles should change!
-  for (let i = 0; i < inSubs.length; i++) {
-
-    childInputs = inSubs[i].getElementsByClassName("inputSub");
-
-    for (let j = 0; j < childInputs.length; j++) {
-      childInput = childInputs[j];
-
-      if (childInput.value == '')
-        return true;
-    }
-  }
-  return false;
-}
-
-function __isFocusedOnInput(){
-  isInput = false;
-  focusedElement = document.activeElement
-  if (focusedElement.tagName === 'INPUT')
-    isInput = true;
-
-  return isInput;
-}
-
-function __isIncorrectInputs(inSubs){
-
-  // Check if visible subtitles have been answered to define if subtitles should change!
-  for (let i = 0; i < inSubs.length; i++){
-
-    childInputs = inSubs[i].getElementsByClassName("inputSub");
-
-    for (let j = 0; j < childInputs.length; j++) {
-      childInput = childInputs[j];
-
-      if (childInput.classList.contains('incorrectInput'))
-      {
-        return false;
-        break;
-      }
-    }
-  }
-
-  return true
-
-}
-
 function __SwapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
 
   // If any current sub already, unset them to set the new one.
@@ -219,6 +187,14 @@ function __SwapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
     newCurrentSubtitle.classList.add('visible');
     newCurrentSubtitle.id = 'current';
 }
+
+function __clearCurrentSubtitle(){
+  var currentSubtitle = document.getElementById('current');
+
+  if (currentSubtitle !== null)
+    currentSubtitle.id = '';
+}
+
 
 function __setVisibleNeighbours(inRange,
                                 inCurrentSub,
@@ -248,7 +224,6 @@ function __setVisibleNeighbours(inRange,
 function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
   // Called on an interval.
   // Function to display subtitles based on the current settings.
-  currentTime = player.getCurrentTime();
 
   var newCurrentSubtitle = __getSubFromTime(inCurrentTime);
 
@@ -259,7 +234,11 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
   var currentSubtitle = document.getElementById('current');
   var visibleSubs = document.getElementsByClassName('visible');
 
+  //todo! check if visibleSubs are within range of currenttime, if not, skip any looping. add handles?
+
   var loopStateInt = parseInt(document.querySelector('input[name="loop"]:checked').value);
+
+  console.log(visibleSubs.length);
 
   if (( loopStateInt === loopOnceRadio ||
         loopStateInt === loopCorrectRadio ||
@@ -268,10 +247,11 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
 
     var endTime = __getEndTime(visibleSubs);
 
-    if (inCurrentTime > endTime){
+    if (loopStateInt === loopOnceRadio){
+      var startTime = __getStartTime(visibleSubs);
 
-      if (loopStateInt === loopOnceRadio){
-        var startTime = __getStartTime(visibleSubs, undefined, undefined);
+      if (inCurrentTime > endTime) {
+
         player.seekTo(startTime);
         //delete callbacks?
         player.pauseVideo();
@@ -279,18 +259,22 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
         return;
         }
 
-      if (loopStateInt === loopCorrectRadio)
-        var startTime = __getStartTime(visibleSubs, false, true);
-      else if (loopStateInt === loopAnsweredRadio)
-        var startTime = __getStartTime(visibleSubs, true);
+      }
 
-      // If already all answered subs, skip to next, no need to loop!
-      if (startTime !== null){
+    // If already all answered subs, skip to next, no need to loop!
+    if (startTime !== null){
+
+      if (inCurrentTime > endTime){
         // Skip any already answered subtitles.
         player.seekTo(startTime);
         return
       }
+
+      else
+        return;
+
     }
+
   }
 
   // Remove any visible subtitles
