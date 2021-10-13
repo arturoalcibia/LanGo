@@ -18,7 +18,7 @@ function onStateChange(event) {
   var playerState = event.data;
 
     if (playerState === YT.PlayerState.PLAYING) {
-      intervals.push(setInterval(displaySubtitles, 100));
+      intervals.push(setInterval(mainSubtitles, 100));
 
     }
     else {
