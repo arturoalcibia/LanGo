@@ -1,19 +1,11 @@
-// Notes:
-// todo:
-//  get back startTime function on not loop all, maybe just loop one subtitle less.
-//  bug: when answering and on loop mode, sometimes 4 subs are displayed.
-//
+
 
 // Query all subs
 var subtitlesDiv = document.getElementsByClassName('sub');
 
 // Get settings
-var beforeSettingsInput = document.getElementById("beforeSettingsInput");
-beforeSettingsInput.value = 1;
-beforeSettingsInput.addEventListener('input', refreshSubtitles);
-var afterSettingsInput  = document.getElementById("afterSettingsInput");
-afterSettingsInput.value = 1;
-afterSettingsInput.addEventListener('input', refreshSubtitles);
+const afterSubtitles = 1;
+const beforeSubtitles = 1;
 
 document.getElementById('loopCorrectRadio').checked = true;
 
@@ -26,7 +18,6 @@ nextSubtitleBtn.addEventListener("click", goToNext );
 const noLoopRadio = 0
 const loopOnceRadio = 1
 const loopCorrectRadio = 2
-const loopAnsweredRadio = 3
 
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
@@ -50,7 +41,7 @@ function __goTo(inPrevious=false) {
     newSub = visibleSubs[0].previousElementSibling;
 
     tempSub = newSub;
-    for (let i = 0; i < parseInt(beforeSettingsInput.value) + 1; i++) {
+    for (let i = 0; i < beforeSubtitles + 1; i++) {
 
       tempSub = tempSub.previousElementSibling;
 
@@ -67,7 +58,7 @@ function __goTo(inPrevious=false) {
     newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
 
     tempSub = newSub;
-    for (let i = 0; i < parseInt(afterSettingsInput.value) + 1; i++) {
+    for (let i = 0; i < afterSubtitles + 1; i++) {
 
       tempSub = tempSub.nextElementSibling;
 
@@ -216,7 +207,8 @@ function __clearCurrentSubtitle(){
 
 function __setVisibleNeighbours(inRange,
                                 inCurrentSub,
-                                inIsBefore = false){
+                                inIsBefore = false,
+                                inStopAtFirstCorrect=false){
 
   if (inRange === 0)
     return
@@ -236,10 +228,14 @@ function __setVisibleNeighbours(inRange,
 
     newSub.classList.add('visible');
     tempSub = newSub;
+
+    if (inStopAtFirstCorrect && __isChildCorrect(newSub))
+      return
   }
 }
 
-function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
+function displaySubtitles(inCurrentTime=player.getCurrentTime(),
+                          inStopAtFirstCorrect=false) {
   // Called on an interval.
   // Function to display subtitles based on the current settings.
 
@@ -260,15 +256,17 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
 
   // Display subtitles before.
   __setVisibleNeighbours(
-      (parseInt(beforeSettingsInput.value) + 1),
+      (beforeSubtitles + 1),
       newCurrentSubtitle,
-      true);
+      true,
+      inStopAtFirstCorrect);
 
   // Display subtitles after.
   __setVisibleNeighbours(
-      parseInt(afterSettingsInput.value) + 1,
+      afterSubtitles + 1,
       newCurrentSubtitle,
-      false);
+      false,
+      inStopAtFirstCorrect);
 
 }
 
@@ -285,7 +283,13 @@ function mainSubtitles(){
 
   if (loopStateInt !== noLoopRadio) {
 
-    var currentTime = player.getCurrentTime()
+    var currentTime = player.getCurrentTime();
+    var newCurrentSubtitle = __getSubFromTime(currentTime);
+
+    if (!Array.from(visibleSubs).includes(newCurrentSubtitle))
+      displaySubtitles()
+      return
+
     var endTime = __getEndTime(visibleSubs);
     var startTime = __getStartTime(visibleSubs);
 
@@ -303,7 +307,7 @@ function mainSubtitles(){
 
       if (currentTime > endTime) {
         if (__isChildrenCorrect(visibleSubs)){
-          displaySubtitles();
+          displaySubtitles(undefined, true);
           return;
         }
 
@@ -312,24 +316,9 @@ function mainSubtitles(){
       }
     }
 
-    else if (loopStateInt === loopAnsweredRadio){
-
-      if (currentTime > endTime) {
-
-        if (__isChildrenCorrect(visibleSubs)){
-          displaySubtitles();
-          return;
-        }
-
-        player.seekTo(startTime);
-
-      }
-    }
-
-    }
-
-    else
-      displaySubtitles();
+  }
+  else
+    displaySubtitles();
 
 }
 
@@ -346,13 +335,13 @@ function refreshSubtitles() {
 
   // Display subtitles before.
   __setVisibleNeighbours(
-      (parseInt(beforeSettingsInput.value) + 1),
+      (beforeSubtitles + 1),
       currentSubtitle,
       true);
 
   // Display subtitles after.
   __setVisibleNeighbours(
-      parseInt(afterSettingsInput.value) + 1,
+      afterSubtitles + 1,
       currentSubtitle,
       false);
 }
