@@ -15,6 +15,12 @@ previousSubtitleBtn.addEventListener("click", goToPrevious);
 var nextSubtitleBtn = document.getElementById('nextSubtitleBtn');
 nextSubtitleBtn.addEventListener("click", goToNext );
 
+var previousUnansweredSubtitleBtn = document.getElementById('previousUnansweredSubtitleBtn');
+previousUnansweredSubtitleBtn.addEventListener("click", goToPreviousUnanswered);
+
+var nextUnansweredSubtitleBtn = document.getElementById('nextUnansweredSubtitleBtn');
+nextUnansweredSubtitleBtn.addEventListener("click", goToNextUnanswered );
+
 const noLoopRadio = 0
 const loopOnceRadio = 1
 const loopCorrectRadio = 2
@@ -39,34 +45,23 @@ function __goTo(inPrevious=false) {
 
   if (inPrevious){
     newSub = visibleSubs[0].previousElementSibling;
-
     tempSub = newSub;
     for (let i = 0; i < beforeSubtitles + 1; i++) {
-
       tempSub = tempSub.previousElementSibling;
-
       if (tempSub === null)
         break
-
       newSub = tempSub;
-
     }
-
   }
 
   else {
     newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
-
     tempSub = newSub;
     for (let i = 0; i < afterSubtitles + 1; i++) {
-
       tempSub = tempSub.nextElementSibling;
-
       if (tempSub === null)
         break
-
       newSub = tempSub;
-
     }
   }
 
@@ -87,6 +82,61 @@ function goToNext(){
 
 function goToPrevious(){
   __goTo(true);
+}
+
+function __goToUnanswered(inPrevious=false) {
+  __clearIntervals();
+  var visibleSubs = document.getElementsByClassName('visible');
+  // Remove any visible subtitles
+  // Todo: don't remove if no unanswered
+  for (let i = 0; i < visibleSubs.length; i++)
+    visibleSubs[i].classList.remove('visible');
+
+  // If no current subtitle, go to next one todo!
+  if (visibleSubs.length === 0)
+    return;
+
+  if (inPrevious){
+    newSub = visibleSubs[0].previousElementSibling;
+
+    while(newSub !== null){
+      newSub = newSub.previousElementSibling;
+
+      if (!__isChildAnswered(newSub))
+        break;
+    }
+
+  }
+
+
+  else {
+    newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+    while(newSub !== null){
+      newSub = newSub.nextElementSibling;
+
+      if (!__isChildAnswered(newSub))
+        break;
+    }
+
+    }
+
+  startTime = parseFloat(newSub.dataset.start);
+  // Remove any visible subtitles
+  for (let i = 0; i < visibleSubs.length; i++)
+    visibleSubs[i].classList.remove('visible');
+
+  __clearCurrentSubtitle();
+  displaySubtitles(startTime);
+  player.seekTo(startTime);
+
+}
+
+function goToNextUnanswered(){
+  __goToUnanswered()
+}
+
+function goToPreviousUnanswered(){
+  __goToUnanswered(true)
 }
 
 function __clearVisible(subToSkip){
@@ -184,7 +234,6 @@ function __isChildrenAnswered(inSubs) {
   }
   return true
 }
-
 
 function __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
 
