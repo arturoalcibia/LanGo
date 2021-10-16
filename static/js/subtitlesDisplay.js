@@ -73,6 +73,9 @@ function __goTo(inPrevious=false) {
   displaySubtitles(startTime);
   player.seekTo(startTime);
 
+  if (player.getPlayerState() === YT.PlayerState.PAUSED)
+    player.playVideo();
+
 }
 
 function goToNext(){
@@ -127,6 +130,9 @@ function __goToUnanswered(inPrevious=false) {
   __clearCurrentSubtitle();
   displaySubtitles(startTime);
   player.seekTo(startTime);
+
+  if (player.getPlayerState() === YT.PlayerState.PAUSED)
+    player.playVideo();
 
 }
 
