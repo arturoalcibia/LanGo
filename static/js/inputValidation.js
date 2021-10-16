@@ -1,3 +1,4 @@
+// Input score at init and on input writing!
 var inputSubtitles = document.getElementsByClassName("inputSub");
 
 var simpleAnswerModeCheckBox = document.getElementById("simpleAnswerModeCheckBox");
@@ -12,7 +13,7 @@ function refreshAnswer() {
 
   let total = inputSubtitles.length;
   let score = document.getElementsByClassName('correctInput').length;
-  scorePercentage.innerText = ((100 * score) / total).toFixed(1).toString();
+  scorePercentage.innerText = `Score: ${score}/${total}`
 }
 
 for (let i = 0; i < inputSubtitles.length; i++) {

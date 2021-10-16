@@ -21,7 +21,6 @@ previousUnansweredSubtitleBtn.addEventListener("click", goToPreviousUnanswered);
 var nextUnansweredSubtitleBtn = document.getElementById('nextUnansweredSubtitleBtn');
 nextUnansweredSubtitleBtn.addEventListener("click", goToNextUnanswered );
 
-const noLoopRadio = 0
 const loopOnceRadio = 1
 const loopCorrectRadio = 2
 
@@ -139,21 +138,6 @@ function goToPreviousUnanswered(){
   __goToUnanswered(true)
 }
 
-function __clearVisible(subToSkip){
-  // Remove any visible subtitles.
-  var visibleSubs = document.getElementsByClassName('visible');
-  for (let i = 0; i < visibleSubs.length; i++){
-
-    visibleSub = visibleSubs[i];
-
-    // Omit the current sub.
-    if (visibleSub === subToSkip)
-      continue
-
-    visibleSub.classList.remove('visible');
-  }
-}
-
 function __getSubFromTime(inTime){
 
   for (let i = 0; i < subtitlesDiv.length; i++) {
@@ -203,6 +187,38 @@ function __isChildCorrect(inSub){
 
 }
 
+function __logNumber(inSub){
+
+  childInputs = inSub.getElementsByClassName("subId");
+  for (let i = 0; i < childInputs.length; i++) {
+    console.log('# # # ');
+    console.log(childInputs[i].innerText);
+    console.log('# # # ');
+  }
+
+}
+
+function __logNumbers(inSubs){
+
+  for (let i = 0; i < inSubs.length; i++) {
+    __logNumber(inSubs[i]);
+  }
+}
+
+function __logVisibleNumbers(){
+  __logNumbers(document.getElementsByClassName('visible'))
+}
+
+function __clearVisible(){
+  var visSubs = document.getElementsByClassName('visible');
+
+  while(visSubs[0]) {
+    visSubs[0].parentNode.removeChild(visSubs[0]);
+  }
+  //for (let i = 0; i < visSubs.length; i++) { __logNumber(visSubs[i]); visSubs[i].classList.remove('visible'); }
+
+}
+
 function __isChildAnswered(inSub){
 
   childInputs = inSub.getElementsByClassName("inputSub");
@@ -226,15 +242,6 @@ function __isChildrenCorrect(inSubs) {
   return true
 }
 
-function __isChildrenAnswered(inSubs) {
-  for (let i = 0; i < inSubs.length; i++) {
-    visibleSub = inSubs[i];
-    if (!__isChildAnswered(visibleSub))
-      return false
-  }
-  return true
-}
-
 function __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
 
   // If any current sub already, unset them to set the new one.
@@ -253,14 +260,14 @@ function __clearCurrentSubtitle(){
     currentSubtitle.id = '';
 }
 
+function __isNeighbour(sourceSubtitle, newSubtitle) {
+  return sourceSubtitle.nextElementSibling === newSubtitle;
+}
 
 function __setVisibleNeighbours(inRange,
                                 inCurrentSub,
                                 inIsBefore = false,
                                 inStopAtFirstCorrect=false){
-
-  if (inRange === 0)
-    return
 
   tempSub = inCurrentSub;
 
@@ -285,9 +292,7 @@ function __setVisibleNeighbours(inRange,
 
 function displaySubtitles(inCurrentTime=player.getCurrentTime(),
                           inStopAtFirstCorrect=false) {
-  // Called on an interval.
   // Function to display subtitles based on the current settings.
-
   var newCurrentSubtitle = __getSubFromTime(inCurrentTime);
 
   // If no sub from time, no need to do any display calls.
@@ -295,11 +300,13 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
     return;
 
   var currentSubtitle = document.getElementById('current');
-  var visibleSubs = document.getElementsByClassName('visible');
+
+  // If same subtitle, no need to display anything new!
+  if (currentSubtitle === newCurrentSubtitle)
+    return
 
   // Remove any visible subtitles
-  for (let i = 0; i < visibleSubs.length; i++)
-    visibleSubs[i].classList.remove('visible');
+  __clearVisible();
 
   __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle);
 
@@ -322,75 +329,49 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
 function mainSubtitles(){
 
   var visibleSubs = document.getElementsByClassName('visible');
+  var currentTime = player.getCurrentTime();
 
   if (visibleSubs.length === 0){
-    displaySubtitles();
+    displaySubtitles(currentTime);
     return;
   }
 
+  var newCurrentSubtitle = __getSubFromTime(currentTime);
+  var isVisible = Array.from(document.getElementsByClassName('visible')).includes(newCurrentSubtitle);
+
   var loopStateInt = parseInt(document.querySelector('input[name="loop"]:checked').value);
 
-  if (loopStateInt !== noLoopRadio) {
+  // In case user fast forwards on youtube video player.
+  if (newCurrentSubtitle !== null &&
+      !isVisible &&
+      !__isNeighbour(visibleSubs[visibleSubs.length - 1], newCurrentSubtitle)){
 
-    var currentTime = player.getCurrentTime();
-    var newCurrentSubtitle = __getSubFromTime(currentTime);
+      displaySubtitles(currentTime);
+      return;
+    }
 
-    if (!Array.from(visibleSubs).includes(newCurrentSubtitle))
-      displaySubtitles()
-      return
+  var endTime = __getEndTime(visibleSubs);
+  var startTime = __getStartTime(visibleSubs);
 
-    var endTime = __getEndTime(visibleSubs);
-    var startTime = __getStartTime(visibleSubs);
+  if (loopStateInt === loopOnceRadio) {
 
-    if (loopStateInt === loopOnceRadio) {
+    if (currentTime > endTime) {
+      __clearIntervals();
+      player.pauseVideo();
+      player.seekTo(startTime);
+    }
+  }
 
-      if (currentTime > endTime) {
-        __clearIntervals();
-        player.pauseVideo();
-        player.seekTo(startTime);
+  else if (loopStateInt === loopCorrectRadio){
+    if (currentTime > endTime) {
+      if (__isChildrenCorrect(visibleSubs)){
+        displaySubtitles(currentTime,undefined);
         return;
       }
+
+      player.seekTo(startTime);
+
     }
-
-    else if (loopStateInt === loopCorrectRadio){
-
-      if (currentTime > endTime) {
-        if (__isChildrenCorrect(visibleSubs)){
-          displaySubtitles(undefined, true);
-          return;
-        }
-
-        player.seekTo(startTime);
-
-      }
-    }
-
   }
-  else
-    displaySubtitles();
 
-}
-
-function refreshSubtitles() {
-
-  var currentSubtitle = document.getElementById('current');
-
-  // No subtitles to display.
-  if (currentSubtitle === null)
-    return
-
-  // Remove any visible subtitles.
-  __clearVisible(currentSubtitle);
-
-  // Display subtitles before.
-  __setVisibleNeighbours(
-      (beforeSubtitles + 1),
-      currentSubtitle,
-      true);
-
-  // Display subtitles after.
-  __setVisibleNeighbours(
-      afterSubtitles + 1,
-      currentSubtitle,
-      false);
 }
