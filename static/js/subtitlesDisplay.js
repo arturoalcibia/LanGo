@@ -197,14 +197,29 @@ function __isChildCorrect(inSub){
 
 }
 
-function __clearVisible(){
-  //document.querySelectorAll('.visible').forEach(e => e.remove());
-  //for (let i = 0; i < visSubs.length; i++) { __logNumber(visSubs[i]); visSubs[i].classList.remove('visible'); }
-  const elements = document.getElementsByClassName('visible');
-  while(elements.length > 0){
-    elements[0].parentNode.removeChild(elements[0]);
-    }
+function __logNumber(inSub){
+  childInputs = inSub.getElementsByClassName("subId");
+  for (let i = 0; i < childInputs.length; i++) {
+    console.log('# # # ');
+    console.log(childInputs[i].innerText);
+    console.log('# # # ');
+  }
 
+}
+
+function __logNumbers(inSubs){
+
+  for (let i = 0; i < inSubs.length; i++) {
+    __logNumber(inSubs[i]);
+  }
+}
+
+function __logVisibleNumbers(){
+  __logNumbers(document.getElementsByClassName('visible'))
+}
+
+function __clearVisible(){
+  document.querySelectorAll('.visible').forEach(e => e.classList.remove('visible'));
 }
 
 function __isChildAnswered(inSub){
@@ -231,14 +246,11 @@ function __isChildrenCorrect(inSubs) {
 }
 
 function __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
-
-  // If any current sub already, unset them to set the new one.
-  //todo! add a note that for a first time, current sub could be null
   if (currentSubtitle !== null)
     currentSubtitle.id = '';
 
-    newCurrentSubtitle.classList.add('visible');
-    newCurrentSubtitle.id = 'current';
+  newCurrentSubtitle.classList.add('visible');
+  newCurrentSubtitle.id = 'current';
 }
 
 function __clearCurrentSubtitle(){
@@ -257,10 +269,10 @@ function __setVisibleNeighbours(inRange,
                                 inIsBefore = false,
                                 inStopAtFirstCorrect=false){
 
-  tempSub = inCurrentSub;
+  var tempSub = inCurrentSub;
 
   // Display subtitles before/after.
-  for (let i = 1; i < inRange; i++){
+  for (let i = 1; i < inRange + 1; i++){
 
     if (inIsBefore)
       newSub = tempSub.previousElementSibling;
@@ -304,14 +316,14 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
 
   // Display subtitles before.
   __setVisibleNeighbours(
-      (beforeSubtitles + 1),
+      beforeSubtitles,
       newCurrentSubtitle,
       true,
       inStopAtFirstCorrect);
 
   // Display subtitles after.
   __setVisibleNeighbours(
-      afterSubtitles + 1,
+      afterSubtitles,
       newCurrentSubtitle,
       false,
       inStopAtFirstCorrect);
@@ -320,20 +332,21 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
 
 function mainSubtitles(){
 
+  var currentTime = player.getCurrentTime();
+  var newCurrentSubtitle = __getSubFromTime(currentTime);
+
+  if (newCurrentSubtitle === null)
+    return;
+
   var visibleSubs = Array.from(document.getElementsByClassName('visible'));
   var visibleSubsLength = visibleSubs.length
-  var currentTime = player.getCurrentTime();
 
   if (visibleSubsLength === 0){
     displaySubtitles(currentTime);
     return;
   }
 
-  var newCurrentSubtitle = __getSubFromTime(currentTime);
   var isVisible = visibleSubs.includes(newCurrentSubtitle);
-
-  if (newCurrentSubtitle === null)
-    return;
 
   // In case user fast forwards on youtube video player.
   if (!isVisible && !__isNeighbour(visibleSubs[visibleSubs.length - 1], newCurrentSubtitle)){
@@ -341,7 +354,7 @@ function mainSubtitles(){
     return;
     }
 
-  var endTime = visibleSubs[visibleSubsLength - 1].dataset.start;
+  var endTime = visibleSubs[visibleSubsLength - 1].dataset.end;
   var startTime = visibleSubs[0].dataset.start;
 
   var loopStateInt = parseInt(document.querySelector('input[name="loop"]:checked').value);
