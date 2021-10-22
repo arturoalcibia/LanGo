@@ -1,19 +1,11 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/subtitles.css') }}">
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
 
-<div id="ytplayer"></div>
-
 <div>
     <p id="scorePercentage">Score: </p>
 </div>
 
-<div>
-    <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
-    <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
-    <input type="button" value="Previous unanswered subtitle" id="previousUnansweredSubtitleBtn"/>
-    <input type="button" value="Next unanswered subtitle" id="nextUnansweredSubtitleBtn"/>
-    <input type="button" value="Answer questions" id="answer"/>
-</div>
+<div id="ytplayer"></div>
 
 {% for subDict in subList %}
     <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
@@ -28,6 +20,14 @@
         <br>
     </div>
 {% endfor %}
+
+<div>
+    <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
+    <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
+    <input type="button" value="Previous unanswered subtitle" id="previousUnansweredSubtitleBtn"/>
+    <input type="button" value="Next unanswered subtitle" id="nextUnansweredSubtitleBtn"/>
+    <input type="button" value="Answer questions" id="answer"/>
+</div>
 
 <div>
     <p>Settings</p>

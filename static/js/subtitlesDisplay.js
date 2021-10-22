@@ -23,6 +23,12 @@ nextUnansweredSubtitleBtn.addEventListener("click", goToNextUnanswered );
 
 document.getElementById('answer').addEventListener("click", ___answer);
 
+document.onreadystatechange = () => {
+    subtitlesDiv.forEach(function(el, i) {
+      el.onclick = function() { player.seekTo(el.dataset.start); }
+    })
+};
+
 const loopOnceRadio = 1
 const loopCorrectRadio = 2
 
@@ -245,6 +251,16 @@ function __isChildrenCorrect(inSubs) {
   return true
 }
 
+function __swapLiveSubtitle(newCurrentSubtitle){
+  var liveSubtitles = document.getElementsByClassName('live');
+  for (let i = 0; i < liveSubtitles.length; i++) {
+    liveSubtitles[i].classList.remove('live')
+  }
+
+  newCurrentSubtitle.classList.add('live');
+
+}
+
 function __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle){
   if (currentSubtitle !== null)
     currentSubtitle.id = '';
@@ -337,6 +353,8 @@ function mainSubtitles(){
 
   if (newCurrentSubtitle === null)
     return;
+
+  __swapLiveSubtitle(newCurrentSubtitle);
 
   var visibleSubs = Array.from(document.getElementsByClassName('visible'));
   var visibleSubsLength = visibleSubs.length
