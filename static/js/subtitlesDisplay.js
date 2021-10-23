@@ -7,8 +7,6 @@ var subtitlesDiv = document.getElementsByClassName('sub');
 const afterSubtitles = 1;
 const beforeSubtitles = 1;
 
-document.getElementById('loopCorrectRadio').checked = true;
-
 var previousSubtitleBtn = document.getElementById('previousSubtitleBtn');
 previousSubtitleBtn.addEventListener("click", goToPrevious);
 
@@ -28,9 +26,6 @@ document.onreadystatechange = () => {
       el.onclick = function() { player.seekTo(el.dataset.start); }
     })
 };
-
-const loopOnceRadio = 1
-const loopCorrectRadio = 2
 
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
@@ -88,13 +83,15 @@ function __goTo(inPrevious=false) {
     }
   }
 
-  startTime = parseFloat(newSub.dataset.start);
-  // Remove any visible subtitles
-  for (let i = 0; i < visibleSubs.length; i++)
-    visibleSubs[i].classList.remove('visible');
+  subTime = parseFloat(newSub.dataset.start);
 
   __clearCurrentSubtitle();
-  displaySubtitles(startTime);
+  displaySubtitles(subTime);
+
+  newVisibleSubs = document.getElementsByClassName('visible');
+  var startTime = parseFloat(newVisibleSubs[0].dataset.start) - 0.500;
+  timer = 500
+
   player.seekTo(startTime);
 
   if (player.getPlayerState() === YT.PlayerState.PAUSED)
@@ -347,7 +344,6 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
 }
 
 function mainSubtitles(){
-
   var currentTime = player.getCurrentTime();
   var newCurrentSubtitle = __getSubFromTime(currentTime);
 
@@ -372,32 +368,16 @@ function mainSubtitles(){
     return;
     }
 
-  var endTime = visibleSubs[visibleSubsLength - 1].dataset.end;
-  var startTime = visibleSubs[0].dataset.start;
+  var endTime = parseFloat(visibleSubs[visibleSubsLength - 1].dataset.end);
+  var startTime = parseFloat(visibleSubs[0].dataset.start) - 0.500;
 
-  var loopStateInt = parseInt(document.querySelector('input[name="loop"]:checked').value);
-
-  if (loopStateInt === loopOnceRadio) {
-
-    if (currentTime > endTime) {
-      __clearIntervals();
-      player.pauseVideo();
-      player.seekTo(startTime);
-    }
-
+  if (currentTime > endTime) {
+    __clearIntervals();
+    timer = 500;
+    player.pauseVideo();
+    player.seekTo(startTime);
   }
 
-  else if (loopStateInt === loopCorrectRadio){
-    if (currentTime > endTime) {
-
-      if (__isChildrenCorrect(visibleSubs)){
-        displaySubtitles(currentTime);
-        return;
-      }
-
-      player.seekTo(startTime);
-
-    }
-  }
+  //if (__isChildrenCorrect(visibleSubs)){
 
 }
