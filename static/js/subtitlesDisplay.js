@@ -1,11 +1,13 @@
-
-
 // Query all subs
 var subtitlesDiv = document.getElementsByClassName('sub');
 
 // Get settings
 const afterSubtitles = 1;
 const beforeSubtitles = 1;
+
+// Amount in Miliseconds.
+const handleMiliSeconds = 500;
+const handleSeconds = handleMiliSeconds * 0.001;
 
 var previousSubtitleBtn = document.getElementById('previousSubtitleBtn');
 previousSubtitleBtn.addEventListener("click", goToPrevious);
@@ -20,12 +22,6 @@ var nextUnansweredSubtitleBtn = document.getElementById('nextUnansweredSubtitleB
 nextUnansweredSubtitleBtn.addEventListener("click", goToNextUnanswered );
 
 document.getElementById('answer').addEventListener("click", ___answer);
-
-document.onreadystatechange = () => {
-    subtitlesDiv.forEach(function(el, i) {
-      el.onclick = function() { player.seekTo(el.dataset.start); }
-    })
-};
 
 // Add all eventListener to input
 for (let i = 0; i < subtitlesDiv.length; i++) {
@@ -89,8 +85,8 @@ function __goTo(inPrevious=false) {
   displaySubtitles(subTime);
 
   newVisibleSubs = document.getElementsByClassName('visible');
-  var startTime = parseFloat(newVisibleSubs[0].dataset.start) - 0.500;
-  timer = 500
+  var startTime = parseFloat(newVisibleSubs[0].dataset.start) - handleSeconds;
+  timer = handleMiliSeconds
 
   player.seekTo(startTime);
 
@@ -200,27 +196,6 @@ function __isChildCorrect(inSub){
 
 }
 
-function __logNumber(inSub){
-  childInputs = inSub.getElementsByClassName("subId");
-  for (let i = 0; i < childInputs.length; i++) {
-    console.log('# # # ');
-    console.log(childInputs[i].innerText);
-    console.log('# # # ');
-  }
-
-}
-
-function __logNumbers(inSubs){
-
-  for (let i = 0; i < inSubs.length; i++) {
-    __logNumber(inSubs[i]);
-  }
-}
-
-function __logVisibleNumbers(){
-  __logNumbers(document.getElementsByClassName('visible'))
-}
-
 function __clearVisible(){
   document.querySelectorAll('.visible').forEach(e => e.classList.remove('visible'));
 }
@@ -237,15 +212,6 @@ function __isChildAnswered(inSub){
 
   return true;
 
-}
-
-function __isChildrenCorrect(inSubs) {
-  for (let i = 0; i < inSubs.length; i++) {
-    visibleSub = inSubs[i];
-    if (!__isChildCorrect(visibleSub))
-      return false
-  }
-  return true
 }
 
 function __swapLiveSubtitle(newCurrentSubtitle){
@@ -279,8 +245,7 @@ function __isNeighbour(sourceSubtitle, newSubtitle) {
 
 function __setVisibleNeighbours(inRange,
                                 inCurrentSub,
-                                inIsBefore = false,
-                                inStopAtFirstCorrect=false){
+                                inIsBefore = false){
 
   var tempSub = inCurrentSub;
 
@@ -300,14 +265,10 @@ function __setVisibleNeighbours(inRange,
 
     newSub.classList.add('visible');
     tempSub = newSub;
-
-    if (inStopAtFirstCorrect && __isChildCorrect(newSub))
-      return
   }
 }
 
-function displaySubtitles(inCurrentTime=player.getCurrentTime(),
-                          inStopAtFirstCorrect=false) {
+function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
 
   // Function to display subtitles based on the current settings.
   var newCurrentSubtitle = __getSubFromTime(inCurrentTime);
@@ -331,15 +292,13 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime(),
   __setVisibleNeighbours(
       beforeSubtitles,
       newCurrentSubtitle,
-      true,
-      inStopAtFirstCorrect);
+      true);
 
   // Display subtitles after.
   __setVisibleNeighbours(
       afterSubtitles,
       newCurrentSubtitle,
-      false,
-      inStopAtFirstCorrect);
+      false);
 
 }
 
@@ -369,7 +328,7 @@ function mainSubtitles(){
     }
 
   var endTime = parseFloat(visibleSubs[visibleSubsLength - 1].dataset.end);
-  var startTime = parseFloat(visibleSubs[0].dataset.start) - 0.500;
+  var startTime = parseFloat(visibleSubs[0].dataset.start) - handleSeconds;
 
   if (currentTime > endTime) {
     __clearIntervals();
@@ -377,7 +336,5 @@ function mainSubtitles(){
     player.pauseVideo();
     player.seekTo(startTime);
   }
-
-  //if (__isChildrenCorrect(visibleSubs)){
 
 }

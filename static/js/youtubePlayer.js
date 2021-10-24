@@ -10,10 +10,9 @@ var playerConfig = {
     controls: 1, // Show pause/play buttons in player
     showinfo: 0, // Hide the video title
     modestbranding: 1, // Hide the Youtube Logo
-    rel: 0, // Hide related videos on pause/end video
+    rel: 1, // Hide related videos on pause/end video
     fs: 1, // Hide the full screen button
     cc_load_policy: 1, // Hide closed captions
-  	cc_lang_pref: 'fr',
     iv_load_policy: 3, // Hide the Video Annotations
     start: 0,
     autohide: 0, // Hide video controls when playing

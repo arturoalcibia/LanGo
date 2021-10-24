@@ -1,3 +1,6 @@
+var hideButton = document.getElementById('hideVideoBtn');
+hideButton.addEventListener("click", hideVideo);
+
 // Connect speed radio buttons.
 speedRadioBtns = document.getElementsByName('speedRadio')
 document.getElementById('oneRadio').checked = true;
@@ -35,4 +38,11 @@ function onStateChange(event) {
         __clearIntervals();
     }
 
+}
+
+function hideVideo(){
+    if (ytplayer.classList.contains('hidden'))
+        ytplayer.classList.remove('hidden')
+    else
+        ytplayer.classList.add('hidden')
 }

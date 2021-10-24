@@ -1,8 +1,13 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/subtitles.css') }}">
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/video.css') }}">
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
 
 <div>
     <p id="scorePercentage">Score: </p>
+</div>
+
+<div>
+    <input type="button" value="Hide Video" id="hideVideoBtn"/>
 </div>
 
 <div id="ytplayer"></div>
@@ -22,6 +27,7 @@
 {% endfor %}
 
 <div>
+
     <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
     <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
     <input type="button" value="Previous unanswered subtitle" id="previousUnansweredSubtitleBtn"/>
