@@ -1,19 +1,24 @@
 // Input score at init and on input writing!
 var inputSubtitles = document.getElementsByClassName("inputSub");
 
+const total = inputSubtitles.length;
+
 var simpleAnswerModeCheckBox = document.getElementById("simpleAnswerModeCheckBox");
 simpleAnswerModeCheckBox.addEventListener('input', refreshAnswer);
 
-var scorePercentage = document.getElementById("scorePercentage");
+var score = document.getElementById('score');
+__setScoreStr();
+
+function __setScoreStr(){
+  score.innerText = `${document.getElementsByClassName('correctInput').length}/${total}`;
+}
 
 function refreshAnswer() {
   for (let i = 0; i < inputSubtitles.length; i++) {
     __validateAnswer(inputSubtitles[i]);
   }
 
-  let total = inputSubtitles.length;
-  let score = document.getElementsByClassName('correctInput').length;
-  scorePercentage.innerText = `Score: ${score}/${total}`
+  __setScoreStr();
 }
 
 for (let i = 0; i < inputSubtitles.length; i++) {

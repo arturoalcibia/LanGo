@@ -37,11 +37,12 @@ function ___answer(){
 
     for (let j = 0; j < childInputs.length; j++) {
       childInput = childInputs[j];
-      childInput.classList.add('correctInput')
-      childInput.classList.remove('incorrectInput')
-      //childInput.value = childInput.dataset.text;
+      childInput.classList.add('correctInput');
+      childInput.classList.remove('incorrectInput');
     }
   }
+
+  __setScoreStr();
 
 }
 
@@ -49,9 +50,6 @@ function __goTo(inPrevious=false) {
   __clearIntervals();
   // Remove any visible subtitles.
   var visibleSubs = document.getElementsByClassName('visible');
-  // Remove any visible subtitles
-  for (let i = 0; i < visibleSubs.length; i++)
-    visibleSubs[i].classList.remove('visible');
 
   // If no current subtitle, go to next one todo!
   if (visibleSubs.length === 0)
@@ -106,10 +104,6 @@ function goToPrevious(){
 function __goToUnanswered(inPrevious=false) {
   __clearIntervals();
   var visibleSubs = document.getElementsByClassName('visible');
-  // Remove any visible subtitles
-  // Todo: don't remove if no unanswered
-  for (let i = 0; i < visibleSubs.length; i++)
-    visibleSubs[i].classList.remove('visible');
 
   // If no current subtitle, go to next one todo!
   if (visibleSubs.length === 0)
@@ -121,7 +115,7 @@ function __goToUnanswered(inPrevious=false) {
     while(newSub !== null){
       newSub = newSub.previousElementSibling;
 
-      if (!__isChildAnswered(newSub))
+      if (!__isChildCorrect(newSub))
         break;
     }
 
@@ -130,10 +124,11 @@ function __goToUnanswered(inPrevious=false) {
 
   else {
     newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+
     while(newSub !== null){
       newSub = newSub.nextElementSibling;
 
-      if (!__isChildAnswered(newSub))
+      if (!__isChildCorrect(newSub))
         break;
     }
 
