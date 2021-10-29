@@ -210,7 +210,13 @@ function __isChildAnswered(inSub){
 }
 
 function __swapLiveSubtitle(newCurrentSubtitle){
-  var liveSubtitles = document.getElementsByClassName('live');
+  let liveSubtitles = document.getElementsByClassName('live');
+
+  if (liveSubtitles.length !== 0){
+    if (newCurrentSubtitle === liveSubtitles[0])
+      return;
+  }
+
   for (let i = 0; i < liveSubtitles.length; i++) {
     liveSubtitles[i].classList.remove('live')
   }
