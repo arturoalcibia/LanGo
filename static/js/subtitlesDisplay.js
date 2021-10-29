@@ -2,8 +2,7 @@
 var subtitlesDiv = document.getElementsByClassName('sub');
 
 // Get settings
-const afterSubtitles = 1;
-const beforeSubtitles = 1;
+const subtitlesAmount = 2
 
 // Amount in Miliseconds.
 const handleMiliSeconds = 500;
@@ -55,38 +54,26 @@ function __goTo(inPrevious=false) {
   if (visibleSubs.length === 0)
     return;
 
-  if (inPrevious){
-    newSub = visibleSubs[0].previousElementSibling;
-    tempSub = newSub;
-    for (let i = 0; i < beforeSubtitles + 1; i++) {
-      tempSub = tempSub.previousElementSibling;
-      if (tempSub === null)
-        break
-      newSub = tempSub;
-    }
-  }
+  if (inPrevious)
+    newStartSub = visibleSubs[0].previousElementSibling;
 
-  else {
-    newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
-    tempSub = newSub;
-    for (let i = 0; i < afterSubtitles + 1; i++) {
-      tempSub = tempSub.nextElementSibling;
-      if (tempSub === null)
-        break
-      newSub = tempSub;
-    }
-  }
+  else
+    newStartSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
 
-  subTime = parseFloat(newSub.dataset.start);
+  if (newStartSub === null || !newStartSub.classList.contains('sub'))
+    return;
+
+  newStartTime = parseFloat(newStartSub.dataset.start);
 
   __clearCurrentSubtitle();
-  displaySubtitles(subTime);
+  displaySubtitles(newStartTime);
 
-  newVisibleSubs = document.getElementsByClassName('visible');
-  var startTime = parseFloat(newVisibleSubs[0].dataset.start) - handleSeconds;
+  let startTimeHandles = newStartTime - handleSeconds;
+
+  // Set timer to restore events.
   timer = handleMiliSeconds
 
-  player.seekTo(startTime);
+  player.seekTo(startTimeHandles);
 
   if (player.getPlayerState() === YT.PlayerState.PAUSED)
     player.playVideo();
@@ -289,15 +276,9 @@ function displaySubtitles(inCurrentTime=player.getCurrentTime()) {
 
   __swapCurrentSubtitle(currentSubtitle, newCurrentSubtitle);
 
-  // Display subtitles before.
-  __setVisibleNeighbours(
-      beforeSubtitles,
-      newCurrentSubtitle,
-      true);
-
   // Display subtitles after.
   __setVisibleNeighbours(
-      afterSubtitles,
+      subtitlesAmount,
       newCurrentSubtitle,
       false);
 
