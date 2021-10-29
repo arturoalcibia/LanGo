@@ -45,20 +45,46 @@ function ___answer(){
 
 }
 
+function __getClosestSubtitle(inTime, inNext=true){
+
+  if (inNext) {
+    for (let i = 0; i < subtitlesDiv.length; i++) {
+      subtitleDiv = subtitlesDiv[i]
+      if (__isTimeGreater(inTime, subtitleDiv))
+        return subtitleDiv;
+    }
+  }
+
+  else {
+    for (let i = subtitlesDiv.length - 1; i >= 0; i--) {
+      subtitleDiv = subtitlesDiv[i]
+      if (__isTimeLess(inTime, subtitleDiv))
+        return subtitleDiv;
+    }
+  }
+
+  return null
+
+}
+
 function __goTo(inPrevious=false) {
   __clearIntervals();
   // Remove any visible subtitles.
   var visibleSubs = document.getElementsByClassName('visible');
 
-  // If no current subtitle, go to next one todo!
-  if (visibleSubs.length === 0)
-    return;
+  newStartSub = null;
 
-  if (inPrevious)
-    newStartSub = visibleSubs[0].previousElementSibling;
+  // If no current subtitle, go to next one.
+  if (visibleSubs.length === 0){
+    newStartSub = __getClosestSubtitle(player.getCurrentTime(), !inPrevious);
+  }
 
-  else
-    newStartSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+  else {
+    if (inPrevious)
+      newStartSub = visibleSubs[0].previousElementSibling;
+    else
+      newStartSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+  }
 
   if (newStartSub === null || !newStartSub.classList.contains('sub'))
     return;
@@ -100,10 +126,12 @@ function __goToUnanswered(inPrevious=false) {
     newSub = visibleSubs[0].previousElementSibling;
 
     while(newSub !== null){
-      newSub = newSub.previousElementSibling;
 
       if (!__isChildCorrect(newSub))
-        break;
+          break;
+
+      newSub = newSub.previousElementSibling;
+
     }
 
   }
@@ -113,13 +141,17 @@ function __goToUnanswered(inPrevious=false) {
     newSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
 
     while(newSub !== null){
-      newSub = newSub.nextElementSibling;
 
       if (!__isChildCorrect(newSub))
         break;
+
+      newSub = newSub.nextElementSibling;
     }
 
     }
+
+  if (newSub === null)
+    return
 
   startTime = parseFloat(newSub.dataset.start);
   // Remove any visible subtitles
@@ -162,6 +194,16 @@ function __isTimeBetweenRange(inCurrentTime, inDiv){
   return (inCurrentTime >= inDiv.dataset.start && inCurrentTime <= inDiv.dataset.end)
 }
 
+function __isTimeGreater(inCurrentTime, inDiv){
+  // Return true if div dataset start and end are between the provided time.
+  return (inCurrentTime < inDiv.dataset.start)
+}
+
+function __isTimeLess(inCurrentTime, inDiv){
+  // Return true if div dataset start and end are between the provided time.
+  return (inCurrentTime > inDiv.dataset.start)
+}
+
 function __isChildCorrect(inSub){
 
   childInputs = inSub.getElementsByClassName("inputSub");
@@ -180,20 +222,6 @@ function __isChildCorrect(inSub){
 
 function __clearVisible(){
   document.querySelectorAll('.visible').forEach(e => e.classList.remove('visible'));
-}
-
-function __isChildAnswered(inSub){
-
-  childInputs = inSub.getElementsByClassName("inputSub");
-
-  for (let j = 0; j < childInputs.length; j++) {
-    childInput = childInputs[j];
-    if (childInput.value === '')
-      return false;
-  }
-
-  return true;
-
 }
 
 function __swapLiveSubtitle(newCurrentSubtitle){
