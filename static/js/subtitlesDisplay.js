@@ -80,8 +80,16 @@ function __goTo(inPrevious=false) {
   }
 
   else {
-    if (inPrevious)
+    if (inPrevious) {
       newStartSub = visibleSubs[0].previousElementSibling;
+
+      for (let i = 1; i < subtitlesAmount + 1; i++) {
+        if (newStartSub === null)
+          break;
+        newStartSub = newStartSub.previousElementSibling;
+      }
+    }
+
     else
       newStartSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
   }
@@ -124,6 +132,12 @@ function __goToUnanswered(inPrevious=false) {
 
   if (inPrevious){
     newSub = visibleSubs[0].previousElementSibling;
+
+    for (let i = 1; i < subtitlesAmount + 1; i++) {
+        if (newSub === null)
+          break;
+        newSub = newSub.previousElementSibling;
+      }
 
     while(newSub !== null){
 
