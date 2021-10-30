@@ -1,3 +1,20 @@
+
+// Query divs to hide before playing.
+const scoreDiv = document.getElementById('scoreDiv');
+const hideBtnDiv = document.getElementById('hideBtnDiv');
+const buttonsDiv = document.getElementById('buttonsDiv');
+const settingsDiv = document.getElementById('settingsDiv');
+
+const divsToHide = [scoreDiv, hideBtnDiv, buttonsDiv, settingsDiv]
+
+const InitialInstructionDiv = document.getElementById('InitialInstructionDiv');
+
+var firstTimePlaying = true;
+
+for (let i = 0; i < divsToHide.length; i++) {
+  divsToHide[i].classList.add('hidden')
+}
+
 var hideButton = document.getElementById('hideVideoBtn');
 hideButton.addEventListener("click", hideVideo);
 
@@ -31,6 +48,15 @@ function onStateChange(event) {
   var playerState = event.data;
 
     if (playerState === YT.PlayerState.PLAYING) {
+
+        if (firstTimePlaying){
+            for (let i = 0; i < divsToHide.length; i++) {
+                divsToHide[i].classList.remove('hidden');
+            }
+            InitialInstructionDiv.classList.add('hidden');
+            firstTimePlaying = false;
+        }
+
       __restoreInterval(timer)
 
     }
