@@ -1,5 +1,8 @@
 var player;
 
+const playPauseButton = document.getElementById('playPauseBtn');
+playPauseButton.addEventListener("click", togglePlayerState);
+
 var playerConfig = {
   height: '360',
   width: '640',
@@ -24,6 +27,20 @@ var playerConfig = {
 
 function onYouTubePlayerAPIReady() {
   player = new YT.Player('ytplayer', playerConfig);
+}
+
+function togglePlayerState() {
+
+  if (player.getPlayerState() === YT.PlayerState.PAUSED){
+    player.playVideo();
+    playPauseButton.value = 'Pause';
+  }
+
+  else{
+    player.pauseVideo();
+    playPauseButton.value = 'Play';
+  }
+
 }
 
 // Inject YouTube API script
