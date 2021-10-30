@@ -1,4 +1,3 @@
-
 // Query divs to hide before playing.
 const scoreDiv = document.getElementById('scoreDiv');
 const hideBtnDiv = document.getElementById('hideBtnDiv');

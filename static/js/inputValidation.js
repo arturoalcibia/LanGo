@@ -6,11 +6,17 @@ const total = inputSubtitles.length;
 var simpleAnswerModeCheckBox = document.getElementById("simpleAnswerModeCheckBox");
 simpleAnswerModeCheckBox.addEventListener('input', refreshAnswer);
 
-var score = document.getElementById('score');
+var scoreInt = document.getElementById('scoreInt');
+const scoreTotal = document.getElementById('scoreTotal');
+
 __setScoreStr();
 
+const submitButton = document.getElementById("submitButton");
+submitButton.addEventListener('input', submitButton);
+
 function __setScoreStr(){
-  score.innerText = `${document.getElementsByClassName('correctInput').length}/${total}`;
+  scoreInt.innerText = document.getElementsByClassName('correctInput').length;
+  scoreTotal.innerText = `/${total}`;
 }
 
 function refreshAnswer() {
