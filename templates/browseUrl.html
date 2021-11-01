@@ -1,0 +1,58 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+<p>Enter a youtube url.</p>
+
+<form id="form" method="POST">
+    {{ videoUrlForm.csrf_token }}
+    <p>{{ videoUrlForm.url(size=32, autocomplete="off") }}</p>
+    <button class="btn btn-primary">Signup</button>
+</form>
+<div id="url-error" class="invalid-feedback"></div>
+
+<div id="errors">
+</div>
+
+<script>
+    const form = document.getElementById('form');
+
+    const fields = {
+        csrf_token: {
+            input: document.getElementById('csrf_token'),
+        },
+        url: {
+            input: document.getElementById('url'),
+            error: document.getElementById('url-error')
+        },
+    }
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const response = await fetch('/browseurl/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                csrf_token: fields.csrf_token.input.value,
+                url: fields.url.input.value,
+            })
+        });
+        if (response.ok) {
+            console.log(response.json());
+        } else {
+            const errors = await response.json();
+            Object.keys(errors).forEach((key) => {
+            console.log(key);
+            console.log(errors[key]);
+            fields[key].input.classList.add('is-invalid');
+            fields[key].error.innerHTML = errors[key][0];
+            });
+
+            //var tag = document.createElement("p");
+            //tag.innerText = response;
+            //var element = document.getElementById("errors");
+            //element.appendChild(tag);
+            //console.log(response.json());
+        }
+    });
+</script>

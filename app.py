@@ -11,8 +11,7 @@ from flask import request
 
 import constants
 from forms.searchVideo import SearchVideoForm
-from forms.exercise import BlankExerciseForm
-from forms.exerciseSettings import ExerciseSettingsForm
+from forms.videoUrl import VideoUrlForm
 
 import youtube
 
@@ -77,6 +76,30 @@ def browse(query=None,
                            searchResults=searchResults,
                            languageCode=languageCode,
                            languages=languagesNames)
+
+@app.route('/browseurl/', methods=("GET", "POST"))
+def browseUrl():
+    '''
+    '''
+
+    videoUrlForm = VideoUrlForm()
+
+    if request.method == 'POST':
+
+        if videoUrlForm.validate():
+            return jsonify(videoUrlForm.errors), 400
+
+        return jsonify(videoUrlForm.errors), 400
+
+    return render_template('browseUrl.html',
+                           videoUrlForm=videoUrlForm)
+
+
+@app.route('/browseurlapi/', methods=('POST',))
+def browseUrlApi():
+    videoUrlForm = VideoUrlForm()
+
+
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
 @app.route('/exercise/<videoId>/', methods=("GET", "POST"))

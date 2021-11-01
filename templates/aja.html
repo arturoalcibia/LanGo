@@ -2,8 +2,8 @@
 <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
 <script>
-  function ajax_follow(name) {
-    $.ajax({url: "/ajatest" + name, success: function(result){
+  function ajaxSearch(url) {
+    $.ajax({url: "/browseUrlApi" + url, success: function(result){
       if (result === 'success') {
         $("#hell").text("Remove");
       }
