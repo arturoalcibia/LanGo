@@ -85,14 +85,15 @@ def browseUrl():
     videoUrlForm = VideoUrlForm()
 
     if request.method == 'POST':
-
         if videoUrlForm.validate():
-            return jsonify(videoUrlForm.errors), 400
+
+            return jsonify(videoUrlForm.VIDEO_INFO), 200
 
         return jsonify(videoUrlForm.errors), 400
 
     return render_template('browseUrl.html',
-                           videoUrlForm=videoUrlForm)
+                           videoUrlForm=videoUrlForm,
+                           videoDivKeys=youtube.VIDEO_INFO_KEYS_TUPLE)
 
 
 @app.route('/browseurlapi/', methods=('POST',))

@@ -5,37 +5,38 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired, ValidationError
 
-YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<code>[\w\-]+)(\S+)?$')
+import youtube
 
 def validate_url(inForm, inField):
     '''
     '''
     urlStr = inField.data
 
-    # Match if youtube url #
-    urlMatch = YOUTUBE_URL_RE.match(urlStr)
+    videoId = youtube.getVideoId(urlStr)
 
-    if not urlMatch:
+    if not videoId:
         raise ValidationError('Url does not seem to be a valid youtube video url.')
 
-    videoCode = urlMatch.group('code') # Ex: cAoR6FUE0kk
-    requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
-        videoCode)
-    requestObj = requests.get(url=requestUrl)
+    videoBasicInfo = youtube.getVideoBasicInfo(videoId)
 
     # Match if video is available/ not private/ exists.
-    if not requestObj.status_code != '200':
+    if not videoBasicInfo:
         raise ValidationError('Youtube video url can\'t be accesed, maybe it\'s private?.')
 
-    #todo!
-    videoInfo = {}
+    subtitlesList = youtube.getSubtitleLanguages(videoId)
 
-    subtitles = videoInfo.get('subtitles', {})
-
-    if subtitles:
+    if not subtitlesList:
         raise ValidationError('Youtube video does not have any subtitles.')
+
+    inForm.VIDEO_INFO[youtube.TITLE_KEY_NAME] = videoBasicInfo[youtube.TITLE_KEY_NAME]
+    inForm.VIDEO_INFO[youtube.THUMBNAIL_URL_KEY_NAME] = videoBasicInfo[youtube.THUMBNAIL_URL_KEY_NAME]
+    inForm.VIDEO_INFO[youtube.VIDEO_ID_KEY_NAME] = videoId
+    inForm.VIDEO_INFO[youtube.SUBTITLES_KEY_NAME] = subtitlesList
 
 class VideoUrlForm(FlaskForm):
     url = StringField('Username', validators=[DataRequired(), validate_url])
     search = SubmitField('Search')
+
+    # Populated on validate_url to pass on POST.
+    VIDEO_INFO = {}
 

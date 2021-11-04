@@ -5,11 +5,16 @@
 <form id="form" method="POST">
     {{ videoUrlForm.csrf_token }}
     <p>{{ videoUrlForm.url(size=32, autocomplete="off") }}</p>
-    <button class="btn btn-primary">Signup</button>
+    {{ videoUrlForm.search }}
 </form>
+
 <div id="url-error" class="invalid-feedback"></div>
 
-<div id="errors">
+{% for videoDivKey in videoDivKeys %}
+    <div id="{{ videoDivKey }}"></div>
+{% endfor %}
+
+<div id="video">
 </div>
 
 <script>
@@ -21,7 +26,8 @@
         },
         url: {
             input: document.getElementById('url'),
-            error: document.getElementById('url-error')
+            error: document.getElementById('url-error'),
+            ok: document.getElementById('video')
         },
     }
 
@@ -38,21 +44,22 @@
             })
         });
         if (response.ok) {
-            console.log(response.json());
+            const videoInfo = await response.json();
+            Object.keys(videoInfo).forEach((key) => {
+                let videoInfoDiv = document.getElementById(key)
+
+                if (videoInfoDiv === null)
+                    return
+
+                videoInfoDiv.innerText = videoInfo[key];
+
+            });
         } else {
             const errors = await response.json();
             Object.keys(errors).forEach((key) => {
-            console.log(key);
-            console.log(errors[key]);
-            fields[key].input.classList.add('is-invalid');
-            fields[key].error.innerHTML = errors[key][0];
+                fields[key].input.classList.add('is-invalid');
+                fields[key].error.innerHTML = errors[key][0];
             });
-
-            //var tag = document.createElement("p");
-            //tag.innerText = response;
-            //var element = document.getElementById("errors");
-            //element.appendChild(tag);
-            //console.log(response.json());
         }
     });
 </script>

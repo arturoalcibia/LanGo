@@ -1,3 +1,4 @@
+import re
 import requests
 import urllib.request
 import xml.etree.ElementTree
@@ -7,6 +8,20 @@ from youtubesearchpython import *
 import constants
 # todo ! wtf
 import constant.spanish
+
+YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<code>[\w\-]+)(\S+)?$')
+
+TITLE_KEY_NAME = 'title'
+THUMBNAIL_URL_KEY_NAME = 'thumbnail_url'
+VIDEO_ID_KEY_NAME = 'videoId'
+SUBTITLES_KEY_NAME = 'subtitlesList'
+
+VIDEO_INFO_KEYS_TUPLE = (
+    TITLE_KEY_NAME,
+    THUMBNAIL_URL_KEY_NAME,
+    VIDEO_ID_KEY_NAME,
+    SUBTITLES_KEY_NAME
+)
 
 def __splitSentence(inSentence):
 
@@ -130,13 +145,14 @@ def getSubtitlesList(inSubtitlesUrl):
 
         return subs
 
-def getVideoBasicInfo(inYoutubeId):
+def getVideoBasicInfo(inVideoId):
     '''
     todo!
+    # todo! remove unused
     Also checks if video is available to embed.
     '''
     requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
-        inYoutubeId)
+        inVideoId)
     requestObj = requests.get(url=requestUrl)
 
     # Match if video is not available/private/exists.
@@ -180,6 +196,16 @@ def getVideoInfo(inYoutubeId,
 
     return videoInfoDict
 
+def getVideoId(inUrl):
+    '''
+    '''
+    urlMatch = YOUTUBE_URL_RE.match(inUrl)
+
+    if not urlMatch:
+        return
+
+    return urlMatch.group('code')  # Ex: cAoR6FUE0kk
+
 def search(inSearchStr,
            inLanguageCode=None,
            inLimit=constants.SEARCH_LIMIT):
@@ -210,16 +236,3 @@ def search(inSearchStr,
         ytSearch.next()
 
     return searchResults
-
-'''
-import time
-
-videoInfo = getVideoInfo('omGF6Ps9Nog', 'es')
-
-for x in range(10):
-    t0 = time.time()
-    getSubtitlesList(videoInfo['subtitles'])
-    t1 = time.time()
-    print(t1-t0)
-    break
-'''
