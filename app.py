@@ -96,11 +96,6 @@ def browseUrl():
                            videoDivKeys=youtube.VIDEO_INFO_KEYS_TUPLE)
 
 
-@app.route('/browseurlapi/', methods=('POST',))
-def browseUrlApi():
-    videoUrlForm = VideoUrlForm()
-
-
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
 @app.route('/exercise/<videoId>/', methods=("GET", "POST"))

@@ -8,14 +8,12 @@
     {{ videoUrlForm.search }}
 </form>
 
-<div id="url-error" class="invalid-feedback"></div>
+<div id="url-error" class="invalid-feedback">
+</div>
 
 {% for videoDivKey in videoDivKeys %}
     <div id="{{ videoDivKey }}"></div>
 {% endfor %}
-
-<div id="video">
-</div>
 
 <script>
     const form = document.getElementById('form');
@@ -31,8 +29,15 @@
         },
     }
 
+    let url = localStorage.getItem('browseUrlValue');
+    if (url !== 'null')
+        fields.url.input.value = url;
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        localStorage.setItem('browseUrlValue', fields.url.input.value);
+
         const response = await fetch('/browseurl/', {
             method: 'POST',
             headers: {
@@ -46,18 +51,41 @@
         if (response.ok) {
             const videoInfo = await response.json();
             Object.keys(videoInfo).forEach((key) => {
-                let videoInfoDiv = document.getElementById(key)
+                const videoInfoDiv = document.getElementById(key);
 
-                if (videoInfoDiv === null)
-                    return
+                videoInfoDiv.innerHTML = '';
 
-                videoInfoDiv.innerText = videoInfo[key];
+                const videoKeyValue = videoInfo[key];
+
+                if (key === 'title'){
+                    let elemToAdd = document.createElement("h2");
+                    let text = document.createTextNode(videoKeyValue);
+                    elemToAdd.appendChild(text);
+                    videoInfoDiv.appendChild(elemToAdd);
+                }
+
+                else if (key === 'thumbnail_url'){
+                    let elemToAdd = document.createElement("img");
+                    elemToAdd.src = videoKeyValue;
+                    videoInfoDiv.appendChild(elemToAdd);
+                }
+                
+                else if (key === 'subtitlesList'){
+
+                    for (const subtitleCode of videoKeyValue) {
+                        let aSubCode = document.createElement('a');
+                        let subCode = document.createTextNode(subtitleCode);
+                        aSubCode.appendChild(subCode);
+                        aSubCode.href = "http://google.com";
+                        aSubCode.title = "my title text";
+                        videoInfoDiv.appendChild(aSubCode);
+                    }
+                }
 
             });
         } else {
             const errors = await response.json();
             Object.keys(errors).forEach((key) => {
-                fields[key].input.classList.add('is-invalid');
                 fields[key].error.innerHTML = errors[key][0];
             });
         }
