@@ -21,6 +21,10 @@ SECRET_KEY = "secret"
 app = Flask(__name__)
 app.config.from_object(__name__)
 
+@app.route("/header")
+def header():
+    return render_template("header.html")
+
 @app.route("/")
 @app.route("/index")
 def index():
@@ -78,35 +82,68 @@ def browse(query=None,
                            languages=languagesNames)
 
 @app.route('/browseurl/', methods=("GET", "POST"))
-def browseUrl():
+@app.route('/browseurl/<videoId>', methods=("GET", "POST"))
+def browseUrl(videoId=None):
     '''
     '''
 
     videoUrlForm = VideoUrlForm()
 
-    if request.method == 'POST':
-        if videoUrlForm.validate():
+    print(videoUrlForm.validate())
+    print(videoUrlForm.validate_on_submit())
 
-            return jsonify(videoUrlForm.VIDEO_INFO), 200
+    if videoUrlForm.validate_on_submit():
+        print('validating!!!')
+        print(videoUrlForm.VIDEO_ID)
+        return redirect(url_for('browseUrl', videoId=videoUrlForm.VIDEO_ID))
 
-        return jsonify(videoUrlForm.errors), 400
+    if videoId:
 
-    return render_template('browseUrl.html',
-                           videoUrlForm=videoUrlForm,
-                           videoDivKeys=youtube.VIDEO_INFO_KEYS_TUPLE)
+        videoInfo = youtube.getVideoInfo(videoId,
+                                         inCheckValidIdBool=True)
+
+        if not videoInfo:
+            return 'Not valid url'
+
+        # Subtitle name: url
+        # Type: {str: str}.
+        subtitlesDict = {}
+        for subtitleName in youtube.getSubtitleLanguages(videoId, inLongName=True):
+            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(subtitleName)
+            videoUrl = url_for('exercise',
+                               videoId=videoId,
+                               languageCode=languageCode)
+            subtitlesDict[subtitleName] = videoUrl
+
+        return render_template('browseUrl.html',
+                               videoInfo=videoInfo,
+                               videoUrlForm=videoUrlForm,
+                               subtitlesDict=subtitlesDict)
+
+    return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
 
 @app.route('/detailedVideo/')
 def detailedVideo():
     '''
     '''
-    videoId = '3mATikP0vew'
+    videoId = 'Q8Sq9r50gc0'
     videoInfo = youtube.getVideoBasicInfo(videoId)
     videoInfo[youtube.VIDEO_ID_KEY_NAME] = videoId
-    videoInfo[youtube.SUBTITLES_KEY_NAME] = youtube.getSubtitleLanguages(videoId, inLongName=True)
+
+    # Subtitle name: url
+    # Type: {str: str}.
+    subtitlesDict = {}
+    for subtitleName in youtube.getSubtitleLanguages(videoId, inLongName=True):
+        languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(subtitleName)
+        videoUrl = url_for('exercise',
+                           videoId=videoId,
+                           languageCode=languageCode)
+        subtitlesDict[subtitleName] = videoUrl
 
     return render_template('detailedVideo.html',
-                           videoInfo=videoInfo)
+                           videoInfo=videoInfo,
+                           subtitlesDict=subtitlesDict)
 
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))

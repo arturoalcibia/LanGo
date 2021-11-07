@@ -1,93 +1,22 @@
-<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+{% extends "header.html" %}
 
-<p>Enter a youtube url.</p>
+{% block content %}
 
-<form id="form" method="POST">
-    {{ videoUrlForm.csrf_token }}
-    <p>{{ videoUrlForm.url(size=32, autocomplete="off") }}</p>
-    {{ videoUrlForm.search }}
-</form>
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
 
-<div id="url-error" class="invalid-feedback">
-</div>
+    <p>Enter a youtube url.</p>
 
-{% for videoDivKey in videoDivKeys %}
-    <div id="{{ videoDivKey }}"></div>
-{% endfor %}
+    <form id="form" method="POST" action="{{ url_for('browseUrl') }}">
+        {{ videoUrlForm.csrf_token }}
+        <p>{{ videoUrlForm.url(size=32, autocomplete="off") }}</p>
+        {{ videoUrlForm.search() }}
+    </form>
 
-<script>
-    const form = document.getElementById('form');
+    <div id="url-error" class="invalid-feedback">
+    </div>
 
-    const fields = {
-        csrf_token: {
-            input: document.getElementById('csrf_token'),
-        },
-        url: {
-            input: document.getElementById('url'),
-            error: document.getElementById('url-error'),
-            ok: document.getElementById('video')
-        },
-    }
+{% endblock %}
 
-    let url = localStorage.getItem('browseUrlValue');
-    if (url !== 'null')
-        fields.url.input.value = url;
-
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-
-        localStorage.setItem('browseUrlValue', fields.url.input.value);
-
-        const response = await fetch('/browseurl/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                csrf_token: fields.csrf_token.input.value,
-                url: fields.url.input.value,
-            })
-        });
-        if (response.ok) {
-            const videoInfo = await response.json();
-            Object.keys(videoInfo).forEach((key) => {
-                const videoInfoDiv = document.getElementById(key);
-
-                videoInfoDiv.innerHTML = '';
-
-                const videoKeyValue = videoInfo[key];
-
-                if (key === 'title'){
-                    let elemToAdd = document.createElement("h2");
-                    let text = document.createTextNode(videoKeyValue);
-                    elemToAdd.appendChild(text);
-                    videoInfoDiv.appendChild(elemToAdd);
-                }
-
-                else if (key === 'thumbnail_url'){
-                    let elemToAdd = document.createElement("img");
-                    elemToAdd.src = videoKeyValue;
-                    videoInfoDiv.appendChild(elemToAdd);
-                }
-                
-                else if (key === 'subtitlesList'){
-
-                    for (const subtitleCode of videoKeyValue) {
-                        let aSubCode = document.createElement('a');
-                        let subCode = document.createTextNode(subtitleCode);
-                        aSubCode.appendChild(subCode);
-                        aSubCode.href = "http://google.com";
-                        aSubCode.title = "my title text";
-                        videoInfoDiv.appendChild(aSubCode);
-                    }
-                }
-
-            });
-        } else {
-            const errors = await response.json();
-            Object.keys(errors).forEach((key) => {
-                fields[key].error.innerHTML = errors[key][0];
-            });
-        }
-    });
-</script>
+{% if videoInfo %}
+    {% include "detailedVideo.html" %}
+{% endif %}

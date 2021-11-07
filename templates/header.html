@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+
+    <body>
+        <header>
+            <nav>
+                <div>
+                    <ul>
+                        <li>
+                            <a href="{{ url_for('index') }}">
+                                <span>LanGo</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="{{ url_for('browseUrl') }}">
+                                <span>Browse by url</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#home">
+                                <span>Profile</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+
+        {% block content %}{% endblock %}
+
+    </body>

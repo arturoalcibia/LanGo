@@ -103,6 +103,10 @@ def convertIsoToGeneric(inVideoLangCode):
     return inVideoLangCode.lower().split('-')[0]
 
 
+def populateSubtitlesLink():
+    pass
+
+
 def getSubtitleLanguages(inVideoId, inLongName=False):
     '''
     '''
