@@ -1,0 +1,11 @@
+<h2>{{ videoInfo['title'] }}</h2>
+
+<img width="256px" src="{{ videoInfo['thumbnail_url'] }}">
+<p>{{ videoInfo['author_name'] }}</p>
+{% for subtitleName, url in subtitlesDict.items() %}
+    <p>
+        <a href="{{ url }}">{{ subtitleName }}</a>
+        <span>-> </span><span>0</span><span> upvotes</span>
+        <span>0</span><span> downvotes</span>
+    </p>
+{% endfor %}

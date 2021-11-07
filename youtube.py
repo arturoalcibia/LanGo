@@ -199,7 +199,9 @@ def getVideoInfo(inYoutubeId,
 
     videoInfoDict = {'link': youtubeLink,
                      'title': videoBasicInfo['title'],
-                     'id': inYoutubeId}
+                     THUMBNAIL_URL_KEY_NAME: videoBasicInfo[THUMBNAIL_URL_KEY_NAME],
+                     'id': inYoutubeId,
+                     }
 
     if inLanguageCode:
 

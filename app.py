@@ -141,7 +141,7 @@ def detailedVideo():
                            languageCode=languageCode)
         subtitlesDict[subtitleName] = videoUrl
 
-    return render_template('detailedVideo.html',
+    return render_template('_detailedVideo.html',
                            videoInfo=videoInfo,
                            subtitlesDict=subtitlesDict)
 

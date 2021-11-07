@@ -15,8 +15,21 @@
     <div id="url-error" class="invalid-feedback">
     </div>
 
-{% endblock %}
-
 {% if videoInfo %}
-    {% include "detailedVideo.html" %}
+    {% include "_detailedVideo.html" %}
 {% endif %}
+
+<script>
+    const urlField = document.getElementById('url');
+    const searchBtn = document.getElementById('search');
+    const cachedUrl = localStorage.getItem('browseUrlValue');
+
+    if (cachedUrl !== 'null')
+        urlField.value = cachedUrl;
+
+    searchBtn.addEventListener('click', async (e) => {
+        localStorage.setItem('browseUrlValue', urlField.value);
+    });
+</script>
+
+{% endblock %}

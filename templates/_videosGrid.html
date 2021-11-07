@@ -1,0 +1,9 @@
+
+{% for video in videos %}
+    <h2>{{ videoInfo['title'] }}</h2>
+    <p>
+        <span>{{ videoInfo['author_name'] }}</span>
+    <span>{{ videoInfo['author_name'] }}</span>
+    </p>
+    <img width="384px" src="{{ videoInfo['thumbnail_url'] }}">
+{% endfor %}
