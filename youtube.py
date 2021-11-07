@@ -92,11 +92,18 @@ def getClosestLanguage(inVideoLanguages,
     '''
     for videoLangCode in inVideoLanguages:
 
+        genericLangCode = convertIsoToGeneric(videoLangCode)
         # Ex: convert 'Es-Mx' to 'es', return first match.
-        if inRequestedCodeLanguage == videoLangCode.lower().split('-')[0]:
+        if inRequestedCodeLanguage == genericLangCode:
             return videoLangCode
 
-def getSubtitleLanguages(inVideoId):
+def convertIsoToGeneric(inVideoLangCode):
+    '''
+    '''
+    return inVideoLangCode.lower().split('-')[0]
+
+
+def getSubtitleLanguages(inVideoId, inLongName=False):
     '''
     '''
     subVideoUrl = 'https://video.google.com/timedtext?v={0}&type=list'.format(inVideoId)
@@ -113,7 +120,18 @@ def getSubtitleLanguages(inVideoId):
         if not child.tag == 'track':
             continue
 
-        languages.append(child.attrib['lang_code'])
+        if inLongName:
+
+            longName = constants.ISO_CODE_LANGUAGE_MAPPING.get(
+                    convertIsoToGeneric(child.attrib['lang_code']))
+
+            if not longName:
+                continue
+
+            languages.append(longName)
+
+        else:
+            languages.append(child.attrib['lang_code'])
 
     return languages
 

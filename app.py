@@ -96,6 +96,18 @@ def browseUrl():
                            videoDivKeys=youtube.VIDEO_INFO_KEYS_TUPLE)
 
 
+@app.route('/detailedVideo/')
+def detailedVideo():
+    '''
+    '''
+    videoId = '3mATikP0vew'
+    videoInfo = youtube.getVideoBasicInfo(videoId)
+    videoInfo[youtube.VIDEO_ID_KEY_NAME] = videoId
+    videoInfo[youtube.SUBTITLES_KEY_NAME] = youtube.getSubtitleLanguages(videoId, inLongName=True)
+
+    return render_template('detailedVideo.html',
+                           videoInfo=videoInfo)
+
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
 @app.route('/exercise/<videoId>/', methods=("GET", "POST"))
