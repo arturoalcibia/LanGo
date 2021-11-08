@@ -14,9 +14,6 @@ def validate_url(inForm, inField):
 
     videoId = youtube.getVideoId(urlStr)
 
-    print(videoId)
-    print(urlStr)
-
     if not videoId:
         raise ValidationError('Url does not seem to be a valid youtube video url.')
 
@@ -30,14 +27,6 @@ def validate_url(inForm, inField):
 
     if not subtitlesList:
         raise ValidationError('Youtube video does not have any subtitles.')
-
-    print('finished validation')
-
-    # todo: remove!
-    inForm.VIDEO_INFO[youtube.TITLE_KEY_NAME] = videoBasicInfo[youtube.TITLE_KEY_NAME]
-    inForm.VIDEO_INFO[youtube.THUMBNAIL_URL_KEY_NAME] = videoBasicInfo[youtube.THUMBNAIL_URL_KEY_NAME]
-    inForm.VIDEO_INFO[youtube.VIDEO_ID_KEY_NAME] = videoId
-    inForm.VIDEO_INFO[youtube.SUBTITLES_KEY_NAME] = subtitlesList
 
     inForm.VIDEO_ID = videoId
 

@@ -14,6 +14,7 @@ YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|
 TITLE_KEY_NAME = 'title'
 THUMBNAIL_URL_KEY_NAME = 'thumbnail_url'
 VIDEO_ID_KEY_NAME = 'videoId'
+DEFAULT_LANG_NAME = 'defaultLang'
 SUBTITLES_KEY_NAME = 'subtitlesList'
 
 VIDEO_INFO_KEYS_TUPLE = (

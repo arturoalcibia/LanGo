@@ -2,7 +2,7 @@
 
 <img width="256px" src="{{ videoInfo['thumbnail_url'] }}">
 <p>{{ videoInfo['author_name'] }}</p>
-{% for subtitleName, url in subtitlesDict.items() %}
+{% for subtitleName, url in videoInfo['subtitlesList'].items() %}
     <p>
         <a href="{{ url }}">{{ subtitleName }}</a>
         <span>-> </span><span>0</span><span> upvotes</span>

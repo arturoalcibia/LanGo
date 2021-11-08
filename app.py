@@ -89,12 +89,7 @@ def browseUrl(videoId=None):
 
     videoUrlForm = VideoUrlForm()
 
-    print(videoUrlForm.validate())
-    print(videoUrlForm.validate_on_submit())
-
     if videoUrlForm.validate_on_submit():
-        print('validating!!!')
-        print(videoUrlForm.VIDEO_ID)
         return redirect(url_for('browseUrl', videoId=videoUrlForm.VIDEO_ID))
 
     if videoId:
@@ -114,6 +109,8 @@ def browseUrl(videoId=None):
                                videoId=videoId,
                                languageCode=languageCode)
             subtitlesDict[subtitleName] = videoUrl
+
+        videoInfo[youtube.SUBTITLES_KEY_NAME] = subtitlesDict
 
         return render_template('browseUrl.html',
                                videoInfo=videoInfo,
