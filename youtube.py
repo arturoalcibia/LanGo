@@ -15,7 +15,15 @@ TITLE_KEY_NAME = 'title'
 THUMBNAIL_URL_KEY_NAME = 'thumbnail_url'
 VIDEO_ID_KEY_NAME = 'videoId'
 DEFAULT_LANG_NAME = 'defaultLang'
-SUBTITLES_KEY_NAME = 'subtitlesList'
+SUBTITLES_KEY_NAME = 'subtitlesDict'
+DEFAULT_LANGUAGE_KEY_NAME = 'defaultLanguage'
+EXERCISE_URL_KEY_NAME = 'exerciseUrl'
+
+# LANGUAGE LIST XML KEYS
+LANG_ORIGINAL_KEY_NAME = 'lang_original'
+LANG_TRANSLATED_KEY_NAME = 'lang_translated'
+LANG_DEFAULT_KEY_NAME = 'lang_default'
+
 
 VIDEO_INFO_KEYS_TUPLE = (
     TITLE_KEY_NAME,
@@ -104,17 +112,17 @@ def convertIsoToGeneric(inVideoLangCode):
     return inVideoLangCode.lower().split('-')[0]
 
 
-def populateSubtitlesLink():
-    pass
-
-
-def getSubtitleLanguages(inVideoId, inLongName=False):
+def getSubtitleLanguages( inVideoId ):
     '''
     '''
     subVideoUrl = 'https://video.google.com/timedtext?v={0}&type=list'.format(inVideoId)
 
     requestObj = requests.get(url=subVideoUrl)
-    languages = []
+
+    # Type: dict { lang_code : { lang_original : str ,
+#                                lang_original : str ,
+    #                            default_lang : bool } }
+    languages = {}
 
     # Match if video is not available/private/exists.
     if not requestObj.status_code != '200':
@@ -125,18 +133,10 @@ def getSubtitleLanguages(inVideoId, inLongName=False):
         if not child.tag == 'track':
             continue
 
-        if inLongName:
-
-            longName = constants.ISO_CODE_LANGUAGE_MAPPING.get(
-                    convertIsoToGeneric(child.attrib['lang_code']))
-
-            if not longName:
-                continue
-
-            languages.append(longName)
-
-        else:
-            languages.append(child.attrib['lang_code'])
+        #todo!!!
+        languages[child.attrib['lang_code']] = {LANG_ORIGINAL_KEY_NAME   : child.attrib['lang_original'],
+                                                LANG_TRANSLATED_KEY_NAME : child.attrib['lang_translated'],
+                                                LANG_DEFAULT_KEY_NAME    : child.attrib.get('lang_default', False)}
 
     return languages
 

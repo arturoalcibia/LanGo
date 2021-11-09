@@ -102,45 +102,27 @@ def browseUrl(videoId=None):
 
         # Subtitle name: url
         # Type: {str: str}.
-        subtitlesDict = {}
-        for subtitleName in youtube.getSubtitleLanguages(videoId, inLongName=True):
-            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(subtitleName)
+        subtitlesDict = youtube.getSubtitleLanguages(videoId)
+
+        for langCode, subDict in youtube.getSubtitleLanguages(videoId).items():
+
+            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(langCode)
+
             videoUrl = url_for('exercise',
                                videoId=videoId,
                                languageCode=languageCode)
-            subtitlesDict[subtitleName] = videoUrl
+
+            subtitlesDict[langCode][youtube.EXERCISE_URL_KEY_NAME] = videoUrl
 
         videoInfo[youtube.SUBTITLES_KEY_NAME] = subtitlesDict
 
+        print(videoInfo['subtitlesDict'])
+
         return render_template('browseUrl.html',
-                               videoInfo=videoInfo,
                                videoUrlForm=videoUrlForm,
-                               subtitlesDict=subtitlesDict)
+                               videoInfo=videoInfo)
 
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
-
-
-@app.route('/detailedVideo/')
-def detailedVideo():
-    '''
-    '''
-    videoId = 'Q8Sq9r50gc0'
-    videoInfo = youtube.getVideoBasicInfo(videoId)
-    videoInfo[youtube.VIDEO_ID_KEY_NAME] = videoId
-
-    # Subtitle name: url
-    # Type: {str: str}.
-    subtitlesDict = {}
-    for subtitleName in youtube.getSubtitleLanguages(videoId, inLongName=True):
-        languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(subtitleName)
-        videoUrl = url_for('exercise',
-                           videoId=videoId,
-                           languageCode=languageCode)
-        subtitlesDict[subtitleName] = videoUrl
-
-    return render_template('_detailedVideo.html',
-                           videoInfo=videoInfo,
-                           subtitlesDict=subtitlesDict)
 
 
 @app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
