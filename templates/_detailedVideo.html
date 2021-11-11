@@ -5,7 +5,7 @@
 {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if subtitleDict['lang_default'] %}
     <p>
         <span>Video's language: </span>
-        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleDict['lang_translated'] }}</a>
+        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleCode }}</a>
         <span>-> </span><span>0</span><span> upvotes</span>
         <span>0</span><span> downvotes</span>
     </p>
@@ -13,7 +13,7 @@
 
 {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if not subtitleDict['lang_default'] %}
     <p>
-        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleDict['lang_translated'] }}</a>
+        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleCode }}</a>
         <span>-> </span><span>0</span><span> upvotes</span>
         <span>0</span><span> downvotes</span>
     </p>

@@ -1,178 +1,76 @@
 import re
 import requests
-import urllib.request
-import xml.etree.ElementTree
 
 from youtubesearchpython import *
+from youtube_transcript_api import YouTubeTranscriptApi
 
 import constants
-# todo ! wtf
-import constant.spanish
+import language
 
+# Used to validate a youtube url and extract it's videoId.
 YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<code>[\w\-]+)(\S+)?$')
 
+# Video title key name, extracted from getVideoBasicInfo Fn.
 TITLE_KEY_NAME = 'title'
+
+# Video thumbnail key name, extracted from getVideoBasicInfo Fn.
 THUMBNAIL_URL_KEY_NAME = 'thumbnail_url'
-VIDEO_ID_KEY_NAME = 'videoId'
+
+#todo!
 DEFAULT_LANG_NAME = 'defaultLang'
+
+# Video subtitles info key name, extracted from  YouTubeTranscriptApi.list_transcripts Fn.
 SUBTITLES_KEY_NAME = 'subtitlesDict'
+
+#todo!
 DEFAULT_LANGUAGE_KEY_NAME = 'defaultLanguage'
+
+#todo!
 EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 
-# LANGUAGE LIST XML KEYS
-LANG_ORIGINAL_KEY_NAME = 'lang_original'
-LANG_TRANSLATED_KEY_NAME = 'lang_translated'
-LANG_DEFAULT_KEY_NAME = 'lang_default'
+# Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
+TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 
 
-VIDEO_INFO_KEYS_TUPLE = (
-    TITLE_KEY_NAME,
-    THUMBNAIL_URL_KEY_NAME,
-    VIDEO_ID_KEY_NAME,
-    SUBTITLES_KEY_NAME
-)
+def formatTranscript(inTranscriptList):
+    ''' Format transcript by:
+            - Adding end float key per text.
+            - Replacing the text str to a list with each word.
 
-def __splitSentence(inSentence):
+    * Currently coming from YouTubeTranscriptApi.Transcript.fetch Fn.
 
-    # List with a portion of the sentence as index 0
-    # and true if hint, false if blank as index 1.
-    # type: list[list[str, bool]]
-    wordTuples = []
+    Args:
+        inTranscriptList (list):
+            Ex:
+                [{'text': str, 'start': float, 'duration': float}].
 
-    # List to be used as an index to slice the sentence.
-    # type: list[int]
-    wordIndices = []
-
-    splittedSentence = inSentence.split(' ')
-
-    # Define if word will be a hint or blank.
-    lastIndex = 0
-    for index, word in enumerate(splittedSentence):
-        # Skip every other word.
-        if (index % 2) == 0:
-            continue
-
-        if word in constant.spanish.words:
-            wordIndices.append(index)
-
-    lastSlicedWordIndex = None
-    for listIndex, wordIndex in enumerate(wordIndices):
-
-        # If first iteration. Add first part of the string. If any. <<<
-        if listIndex == 0 and wordIndex > 0:
-            wordTuples.append(
-                (' '.join(splittedSentence[:wordIndex]),
-                 False))
-
-        # Add any previous leftover strings as hints. If any.
-        if lastSlicedWordIndex is not None:
-
-            joinedSentence = None
-            wordIndexDifference = wordIndex - lastSlicedWordIndex
-
-            if wordIndexDifference > 2:
-                joinedSentence = ' '.join(splittedSentence[lastSlicedWordIndex + 1:wordIndex])
-
-            elif wordIndexDifference > 1:
-                joinedSentence = splittedSentence[lastSlicedWordIndex + 1]
-
-            if joinedSentence is not None:
-                wordTuples.append((joinedSentence, False))
-
-        wordTuples.append((splittedSentence[wordIndex], True))
-        lastSlicedWordIndex = wordIndex
-
-        # If last iteration, add last part of string. >>>
-        if listIndex + 1 == len(wordIndices):
-            wordTuples.append(
-                (' '.join(splittedSentence[wordIndex + 1:]),
-                 False))
-
-    # If no words were added as blanks, add the whole sentence as hint.
-    if not wordTuples:
-        wordTuples.append((inSentence, False))
-
-    return wordTuples
-
-def getClosestLanguage(inVideoLanguages,
-                       inRequestedCodeLanguage):
-    '''Get closest language
-    todo!
+    New format:
+        List: [{'text': list[str],
+                'start': float,
+                'end': float,
+                'duration': float}].
     '''
-    for videoLangCode in inVideoLanguages:
+    for subDict in inTranscriptList:
 
-        genericLangCode = convertIsoToGeneric(videoLangCode)
-        # Ex: convert 'Es-Mx' to 'es', return first match.
-        if inRequestedCodeLanguage == genericLangCode:
-            return videoLangCode
+        subDict['text'] = language.splitSentence(subDict['text'])
+        startFloat = float(subDict['start'])
+        subDict['end'] = round(float(subDict['duration']) + startFloat, 2)
 
-def convertIsoToGeneric(inVideoLangCode):
-    '''
-    '''
-    return inVideoLangCode.lower().split('-')[0]
-
-
-def getSubtitleLanguages( inVideoId ):
-    '''
-    '''
-    subVideoUrl = 'https://video.google.com/timedtext?v={0}&type=list'.format(inVideoId)
-
-    requestObj = requests.get(url=subVideoUrl)
-
-    # Type: dict { lang_code : { lang_original : str ,
-#                                lang_original : str ,
-    #                            default_lang : bool } }
-    languages = {}
-
-    # Match if video is not available/private/exists.
-    if not requestObj.status_code != '200':
-        return None
-
-    for child in xml.etree.ElementTree.fromstring(requestObj.content).iter('*'):
-
-        if not child.tag == 'track':
-            continue
-
-        #todo!!!
-        languages[child.attrib['lang_code']] = {LANG_ORIGINAL_KEY_NAME   : child.attrib['lang_original'],
-                                                LANG_TRANSLATED_KEY_NAME : child.attrib['lang_translated'],
-                                                LANG_DEFAULT_KEY_NAME    : child.attrib.get('lang_default', False)}
-
-    return languages
-
-def getSubtitlesList(inSubtitlesUrl):
-    '''
-
-    Returns:
-         dict:
-            dict{'end'  : float ,
-                 'start': float ,
-                 'text' : [ [ str , bool ] ] }
-    '''
-    with urllib.request.urlopen(inSubtitlesUrl) as response:
-        subsXml = xml.etree.ElementTree.parse(response)
-        subRoot = subsXml.getroot()
-        subs = []
-        for xmlElement in subRoot:
-
-            start = xmlElement.attrib['start']
-
-            # Used to precise display
-            startFloat = float(start)
-
-            wordTuples = __splitSentence(xmlElement.text)
-
-            subs.append({'end': round(float(xmlElement.attrib['dur']) + startFloat, 2),
-                         'start': startFloat,
-                         'text': wordTuples})
-
-        return subs
 
 def getVideoBasicInfo(inVideoId):
-    '''
-    todo!
-    # todo! remove unused
-    Also checks if video is available to embed.
+    '''Does a quick request to check for its availability to embed, if it's not private.
+
+    Args:
+        inVideoId (str): video Id.
+
+    Returns:
+        dict: Youtube response.
+            Ex:
+                {"title":"La Hora Feliz",
+                "author_name":"Cojo Feliz",
+                "author_url":"https://www.youtube.com/user/cojofeliz",
+                "thumbnail_url":"https://i.ytimg.com/vi/yJhBISGvt08/hqdefault.jpg",
+                ...} #todo! prune!
     '''
     requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
         inVideoId)
@@ -189,40 +87,65 @@ def getVideoBasicInfo(inVideoId):
 
 def getVideoInfo(inYoutubeId,
                  inLanguageCode=None,
-                 inCheckValidIdBool=True):
+                 inOnlyManualSubtitlesBool=True):
+    '''Checks if passed youtube Id is valid. Returns a video's information.
 
-    videoBasicInfo = getVideoBasicInfo(inYoutubeId)
+    Args:
+        inYoutubeId (str): video Id.
+        inLanguageCode (str): Language code to check if available as a subtitle. If not, return None.
+        inOnlyManualSubtitlesBool (str): Retrieve only manually created subtitles. todo!
 
-    if inCheckValidIdBool and not videoBasicInfo:
+    Returns:
+
+        {'title': 'Test!',
+        'author_name': "Rachel's English",
+        'author_url': 'https://www.youtube.com/c/rachelsenglish',
+        'thumbnail_url': 'https://i.ytimg.com/vi/t6bbuDUPIgk/hqdefault.jpg',
+        'id': 't6bbuDUPIgk',
+        'link': 'https://www.youtube.com/watch?v=t6bbuDUPIgk',
+        'subtitlesDict':
+            {'af':
+                {'transcriptObj': <youtube_transcript_api._transcripts.Transcript object at 0x00...>},
+            ...
+        }
+
+    '''
+    videoInfoDict = getVideoBasicInfo(inYoutubeId)
+
+    if not videoInfoDict:
         return
 
+    videoInfoDict['id'] = inYoutubeId
     youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
+    videoInfoDict['link'] = youtubeLink
 
-    videoInfoDict = {'link': youtubeLink,
-                     'title': videoBasicInfo['title'],
-                     THUMBNAIL_URL_KEY_NAME: videoBasicInfo[THUMBNAIL_URL_KEY_NAME],
-                     'id': inYoutubeId,
-                     }
+    transcripts = YouTubeTranscriptApi.list_transcripts(inYoutubeId)
 
-    if inLanguageCode:
+    manuallyCreatedTranscriptsDict = transcripts._manually_created_transcripts
 
-        subtitleLanguages = getSubtitleLanguages(inYoutubeId)
+    if inOnlyManualSubtitlesBool:
 
-        closestLanguage = getClosestLanguage(
-            subtitleLanguages,
-            inLanguageCode)
-
-        if not closestLanguage:
+        if not manuallyCreatedTranscriptsDict:
             return
 
-        videoInfoDict['subtitles'] = 'https://www.youtube.com/api/timedtext?lang={0}&v={1}'.format(
-            closestLanguage,
-            inYoutubeId)
+        if inLanguageCode and inLanguageCode not in manuallyCreatedTranscriptsDict.keys():
+            return
+
+    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj}
+                                         for key, transcriptObj
+                                         in manuallyCreatedTranscriptsDict.items()}
 
     return videoInfoDict
 
 def getVideoId(inUrl):
-    '''
+    '''Extract youtube id from a youtube url.
+
+    Args:
+        inUrl (str): youtube url.
+            Can be formatted in multiple ways and arguments.
+
+    Returns:
+        None | str: videoId.
     '''
     urlMatch = YOUTUBE_URL_RE.match(inUrl)
 
@@ -247,12 +170,10 @@ def search(inSearchStr,
 
             getVideoInfoKwargs = {}
 
-            if inLanguageCode:
+            if False:
                 getVideoInfoKwargs['inLanguageCode'] = inLanguageCode
 
-            videoInfo = getVideoInfo(videoInfoDict['id'],
-                                     inCheckValidIdBool=True,
-                                     **getVideoInfoKwargs)
+            videoInfo = getVideoInfo(videoInfoDict['id'])
 
             if videoInfo:
                 searchResults.append(videoInfo)

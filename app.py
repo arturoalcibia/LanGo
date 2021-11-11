@@ -1,3 +1,6 @@
+# todo! Cache it! alternatives: session/flask cache rnd
+# todo! do exercise page to choose language!!!
+
 import urllib.request
 import xml.etree.ElementTree
 
@@ -31,10 +34,35 @@ def index():
     '''Index page, Let's you sign up/ log in or continue as guest.
     Gets redirected if a session exists.
     '''
-    #todo!
-    # If signed skip to next page
+    videos = youtube.search('test')
 
-    return render_template("index.html")
+    subVideos = []
+
+    for videoInfo in videos:
+
+        videoId = videoInfo['id']
+        # Subtitle name: url
+        # Type: {str: str}.
+        subtitlesDict = youtube.getSubtitleLanguages(videoId)
+
+        if not subtitlesDict:
+            continue
+
+        for langCode, subDict in youtube.getSubtitleLanguages(videoId).items():
+
+            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(langCode)
+
+            videoUrl = url_for('exercise',
+                               videoId=videoId,
+                               languageCode=languageCode)
+
+            subtitlesDict[langCode][youtube.EXERCISE_URL_KEY_NAME] = videoUrl
+
+        videoInfo[youtube.SUBTITLES_KEY_NAME] = subtitlesDict
+
+        subVideos.append(videoInfo)
+
+    return render_template("index.html", videos=subVideos)
 
 @app.route('/browse/<query>/<languageCode>', methods=("GET", "POST"))
 @app.route('/browse/<query>/', methods=("GET", "POST"))
@@ -93,30 +121,18 @@ def browseUrl(videoId=None):
         return redirect(url_for('browseUrl', videoId=videoUrlForm.VIDEO_ID))
 
     if videoId:
-
-        videoInfo = youtube.getVideoInfo(videoId,
-                                         inCheckValidIdBool=True)
+        videoInfo = youtube.getVideoInfo(videoId)
 
         if not videoInfo:
             return 'Not valid url'
 
-        # Subtitle name: url
-        # Type: {str: str}.
-        subtitlesDict = youtube.getSubtitleLanguages(videoId)
-
-        for langCode, subDict in youtube.getSubtitleLanguages(videoId).items():
-
-            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(langCode)
+        for langCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
             videoUrl = url_for('exercise',
                                videoId=videoId,
-                               languageCode=languageCode)
+                               languageCode=langCode)
 
-            subtitlesDict[langCode][youtube.EXERCISE_URL_KEY_NAME] = videoUrl
-
-        videoInfo[youtube.SUBTITLES_KEY_NAME] = subtitlesDict
-
-        print(videoInfo['subtitlesDict'])
+            subDict[youtube.EXERCISE_URL_KEY_NAME] = videoUrl
 
         return render_template('browseUrl.html',
                                videoUrlForm=videoUrlForm,
@@ -125,25 +141,23 @@ def browseUrl(videoId=None):
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
 
-@app.route('/exercise/<videoId>/<languageCode>', methods=("GET", "POST"))
-@app.route('/exercise/<videoId>/', methods=("GET", "POST"))
+@app.route('/exercise/<videoId>/<languageCode>')
+@app.route('/exercise/<videoId>/')
 def exercise(videoId=None,
              languageCode=None):
-
-    #todo! handle when not providing languageCode here and on videoInfo
-    # todo! Cache it! alternatives: session/flask cache rnd
+    '''
+    '''
     videoInfo = youtube.getVideoInfo(videoId,
-                                     languageCode,
-                                     inCheckValidIdBool=True)
+                                     inLanguageCode=languageCode)
 
     if not videoInfo:
         return 'Not valid url'
 
-    #todo! do exercise page to choose language!!!
     if languageCode is None:
         return 'No provided language'
 
-    subList = youtube.getSubtitlesList(videoInfo['subtitles'])
+    subList = videoInfo[youtube.SUBTITLES_KEY_NAME][languageCode][youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
+    youtube.formatTranscript(subList)
 
     return render_template('exercise.html',
                            videoId=videoId,
