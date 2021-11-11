@@ -1,6 +1,6 @@
 # todo! Cache it! alternatives: session/flask cache rnd
 # todo! do exercise page to choose language!!!
-
+import functools
 import urllib.request
 import xml.etree.ElementTree
 
@@ -35,34 +35,10 @@ def index():
     Gets redirected if a session exists.
     '''
     videos = youtube.search('test')
-
-    subVideos = []
-
     for videoInfo in videos:
+        __populateVideoInfoUrls(videoInfo)
 
-        videoId = videoInfo['id']
-        # Subtitle name: url
-        # Type: {str: str}.
-        subtitlesDict = youtube.getSubtitleLanguages(videoId)
-
-        if not subtitlesDict:
-            continue
-
-        for langCode, subDict in youtube.getSubtitleLanguages(videoId).items():
-
-            languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(langCode)
-
-            videoUrl = url_for('exercise',
-                               videoId=videoId,
-                               languageCode=languageCode)
-
-            subtitlesDict[langCode][youtube.EXERCISE_URL_KEY_NAME] = videoUrl
-
-        videoInfo[youtube.SUBTITLES_KEY_NAME] = subtitlesDict
-
-        subVideos.append(videoInfo)
-
-    return render_template("index.html", videos=subVideos)
+    return render_template("index.html", videos=videos)
 
 @app.route('/browse/<query>/<languageCode>', methods=("GET", "POST"))
 @app.route('/browse/<query>/', methods=("GET", "POST"))
@@ -75,9 +51,7 @@ def browse(query=None,
         - Let them browse popular playlists.
         - Create playlists
 
-    todo:
-        Common header
-        | LanGO | Browse videos | Browse playlists | User profile
+    TODO!!!!
     '''
 
     searchVideoForm = SearchVideoForm()
@@ -114,7 +88,6 @@ def browse(query=None,
 def browseUrl(videoId=None):
     '''
     '''
-
     videoUrlForm = VideoUrlForm()
 
     if videoUrlForm.validate_on_submit():
@@ -122,17 +95,10 @@ def browseUrl(videoId=None):
 
     if videoId:
         videoInfo = youtube.getVideoInfo(videoId)
+        __populateVideoInfoUrls(videoInfo)
 
         if not videoInfo:
             return 'Not valid url'
-
-        for langCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
-
-            videoUrl = url_for('exercise',
-                               videoId=videoId,
-                               languageCode=langCode)
-
-            subDict[youtube.EXERCISE_URL_KEY_NAME] = videoUrl
 
         return render_template('browseUrl.html',
                                videoUrlForm=videoUrlForm,
@@ -149,6 +115,7 @@ def exercise(videoId=None,
     '''
     videoInfo = youtube.getVideoInfo(videoId,
                                      inLanguageCode=languageCode)
+    __populateVideoInfoUrls(videoInfo)
 
     if not videoInfo:
         return 'Not valid url'
@@ -163,6 +130,16 @@ def exercise(videoId=None,
                            videoId=videoId,
                            languageCode=languageCode,
                            subList=subList)
+
+def __populateVideoInfoUrls(inVideoInfo):
+    '''
+    '''
+    for langCode, subDict in inVideoInfo[youtube.SUBTITLES_KEY_NAME].items():
+
+        videoUrl = url_for('exercise',
+                           videoId=inVideoInfo['id'],
+                           languageCode=langCode)
+        subDict[youtube.EXERCISE_URL_KEY_NAME] = videoUrl
 
 if __name__ == "__main__":
     app.run()

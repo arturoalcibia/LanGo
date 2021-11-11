@@ -23,9 +23,10 @@ def validate_url(inForm, inField):
     if not videoBasicInfo:
         raise ValidationError('Youtube video url can\'t be accesed, maybe it\'s private?.')
 
-    subtitlesList = youtube.getSubtitleLanguages(videoId)
+    # todo! too broad!
+    videoInfo = youtube.getVideoInfo(videoId)
 
-    if not subtitlesList:
+    if not videoInfo:
         raise ValidationError('Youtube video does not have any subtitles.')
 
     inForm.VIDEO_ID = videoId
@@ -33,9 +34,6 @@ def validate_url(inForm, inField):
 class VideoUrlForm(FlaskForm):
     url = StringField('Username', validators=[DataRequired(), validate_url])
     search = SubmitField('Search')
-
-    # Populated on validate_url to pass on POST.
-    VIDEO_INFO = {}
 
     VIDEO_ID = None
 

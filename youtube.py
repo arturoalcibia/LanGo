@@ -1,8 +1,9 @@
+import functools
 import re
 import requests
 
 from youtubesearchpython import *
-from youtube_transcript_api import YouTubeTranscriptApi
+import youtube_transcript_api
 
 import constants
 import language
@@ -31,6 +32,9 @@ EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 # Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
 TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 
+# Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
+IS_DEFAULT_TRANSCRIPT_KEY_NAME = 'isDefault'
+
 
 def formatTranscript(inTranscriptList):
     ''' Format transcript by:
@@ -56,7 +60,7 @@ def formatTranscript(inTranscriptList):
         startFloat = float(subDict['start'])
         subDict['end'] = round(float(subDict['duration']) + startFloat, 2)
 
-
+@functools.lru_cache(maxsize=None)
 def getVideoBasicInfo(inVideoId):
     '''Does a quick request to check for its availability to embed, if it's not private.
 
@@ -85,6 +89,7 @@ def getVideoBasicInfo(inVideoId):
 
     return requestObj.json()
 
+@functools.lru_cache(maxsize=None)
 def getVideoInfo(inYoutubeId,
                  inLanguageCode=None,
                  inOnlyManualSubtitlesBool=True):
@@ -105,7 +110,8 @@ def getVideoInfo(inYoutubeId,
         'link': 'https://www.youtube.com/watch?v=t6bbuDUPIgk',
         'subtitlesDict':
             {'af':
-                {'transcriptObj': <youtube_transcript_api._transcripts.Transcript object at 0x00...>},
+                {'transcriptObj': <youtube_transcript_api._transcripts.Transcript object at 0x00...>}, #todo: const!
+                {'isDefault': bool}
             ...
         }
 
@@ -118,8 +124,10 @@ def getVideoInfo(inYoutubeId,
     videoInfoDict['id'] = inYoutubeId
     youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
     videoInfoDict['link'] = youtubeLink
-
-    transcripts = YouTubeTranscriptApi.list_transcripts(inYoutubeId)
+    try:
+        transcripts = youtube_transcript_api.YouTubeTranscriptApi.list_transcripts(inYoutubeId)
+    except youtube_transcript_api._errors.TranscriptsDisabled:
+        return
 
     manuallyCreatedTranscriptsDict = transcripts._manually_created_transcripts
 
@@ -131,7 +139,8 @@ def getVideoInfo(inYoutubeId,
         if inLanguageCode and inLanguageCode not in manuallyCreatedTranscriptsDict.keys():
             return
 
-    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj}
+    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj,
+                                              IS_DEFAULT_TRANSCRIPT_KEY_NAME:transcriptObj.is_default}
                                          for key, transcriptObj
                                          in manuallyCreatedTranscriptsDict.items()}
 
@@ -154,26 +163,38 @@ def getVideoId(inUrl):
 
     return urlMatch.group('code')  # Ex: cAoR6FUE0kk
 
+@functools.lru_cache(maxsize=None)
 def search(inSearchStr,
            inLanguageCode=None,
-           inLimit=constants.SEARCH_LIMIT):
+           inRetryLimit=constants.RETRY_LIMIT,
+           inSearchLimit=constants.SEARCH_LIMIT):
+    '''Browse for youtube videos.
 
+    Args:
+         inSearchStr (str): Query str to search.
+         inLanguageCode (str): Only display videos with subtitle tracks on the provided language.
+         inSearchLimit (int): Number of searches to display,
+            won't neccesarily be fulfilled if it goes above the retry limit.
+         inRetryLimit (int): Number of retries until the search limit is fulfilled.
+
+    Returns:
+        #todo!
+    '''
     searchResults = []
     retryCounter = 0
 
-    #todo! limit dooooo constant
-    ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=20)
+    ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=1)
 
-    #todo! DOESNT STOP WHEN REACHED TO LIMIT
-    while len(searchResults) < inLimit or retryCounter < constants.RETRY_LIMIT:
+    while len(searchResults) < inSearchLimit or retryCounter < inRetryLimit:
         for videoInfoDict in ytSearch.result()['result']:
 
             getVideoInfoKwargs = {}
 
-            if False:
+            if inLanguageCode:
                 getVideoInfoKwargs['inLanguageCode'] = inLanguageCode
 
-            videoInfo = getVideoInfo(videoInfoDict['id'])
+            videoInfo = getVideoInfo(videoInfoDict['id'],
+                                     **getVideoInfoKwargs)
 
             if videoInfo:
                 searchResults.append(videoInfo)
