@@ -1,0 +1,18 @@
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+<p>Submit exercise and reveal answers.</p>
+
+<form id="form" method="POST" action="{{ url_for('exercise') }}" onsubmit="return prefillScore()">
+    {{ submitExerciseForm.csrf_token }}
+    <p>{{ submitExerciseForm.currentScore(size=32, autocomplete="off", type='hidden') }}</p>
+    {{ submitExerciseForm.submit() }}
+</form>
+
+<script>
+
+    const currentScore = document.getElementById('currentScore');
+    function prefillScore(){
+        currentScore.value = 50;
+    }
+
+</script>

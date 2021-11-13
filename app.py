@@ -15,6 +15,7 @@ from flask import request
 import constants
 from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
+from forms.submitExercise import SubmitExerciseForm
 
 import youtube
 
@@ -108,11 +109,18 @@ def browseUrl(videoId=None):
 
 
 @app.route('/exercise/<videoId>/<languageCode>')
-@app.route('/exercise/<videoId>/')
+@app.route('/exercise', methods=("POST",))
 def exercise(videoId=None,
              languageCode=None):
     '''
     '''
+    submitExerciseForm = SubmitExerciseForm()
+
+    if submitExerciseForm.validate_on_submit():
+        print('hola')
+        print(request.args)
+        return
+
     videoInfo = youtube.getVideoInfo(videoId,
                                      inLanguageCode=languageCode)
     __populateVideoInfoUrls(videoInfo)
@@ -123,13 +131,19 @@ def exercise(videoId=None,
     if languageCode is None:
         return 'No provided language'
 
-    subList = videoInfo[youtube.SUBTITLES_KEY_NAME][languageCode][youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
+    subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
+
+    if not subDict:
+        return '{0} Not found.'.format(languageCode)
+
+    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
     youtube.formatTranscript(subList)
 
     return render_template('exercise.html',
                            videoId=videoId,
                            languageCode=languageCode,
-                           subList=subList)
+                           subList=subList,
+                           submitExerciseForm=submitExerciseForm)
 
 def __populateVideoInfoUrls(inVideoInfo):
     '''

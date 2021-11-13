@@ -10,9 +10,21 @@ var scoreInt = document.getElementById('scoreInt');
 const scoreTotal = document.getElementById('scoreTotal');
 
 __setScoreStr();
+__setCachedAnswers();
 
-const submitButton = document.getElementById("submitButton");
-submitButton.addEventListener('input', submitButton);
+function __setCachedAnswers(){
+
+  for (let i = 0; i < inputSubtitles.length; i++) {
+    inputSub = inputSubtitles[i];
+    cachedInputSub = localStorage.getItem(`${videoId}.${inputSub.id}`)
+
+    if (cachedInputSub === null)
+      continue
+
+    inputSub.value = cachedInputSub;
+  }
+
+}
 
 function __setScoreStr(){
   scoreInt.innerText = document.getElementsByClassName('correctInput').length;
@@ -63,11 +75,14 @@ function __validateAnswer(inInputBox){
   if (isCorrect) {
     inInputBox.classList.add('correctInput')
     inInputBox.classList.remove('incorrectInput')
+
   }
   else{
     inInputBox.classList.add('incorrectInput')
     inInputBox.classList.remove('correctInput')
   }
+
+  localStorage.setItem(`${videoId}.${inInputBox.id}`, inInputBox.value);
 
 }
 
