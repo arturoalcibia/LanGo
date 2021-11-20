@@ -1,29 +1,27 @@
-# todo! Cache it! alternatives: session/flask cache rnd
-# todo! do exercise page to choose language!!!
-import functools
-import urllib.request
-import xml.etree.ElementTree
-
 from flask import Flask
 from flask import redirect
-from flask import jsonify
 from flask import render_template
-from flask import session
 from flask import url_for
-from flask import request
 
 import constants
 from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
 from forms.submitExercise import SubmitExerciseForm
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
+from config import Config
 import youtube
 
 DEBUG = True
 SECRET_KEY = "secret"
 
 app = Flask(__name__)
-app.config.from_object(__name__)
+app.config.from_object(Config)
+db = SQLAlchemy(app)
+migrate = Migrate(app, db)
+
+import models
 
 @app.route("/header")
 def header():
@@ -35,9 +33,27 @@ def index():
     '''Index page, Let's you sign up/ log in or continue as guest.
     Gets redirected if a session exists.
     '''
-    videos = youtube.search('test')
-    for videoInfo in videos:
-        __populateVideoInfoUrls(videoInfo)
+
+    videos = []
+    for video in models.Video.query.all():
+
+        videoId = video.id
+
+        videoDict = {youtube.ID_KEY_NAME        : videoId     ,
+                     youtube.TITLE_KEY_NAME     : video.title ,
+                     youtube.SUBTITLES_KEY_NAME : {}          }
+
+        for subtitleTrack in video.subtitleTracks.all():
+
+            langCode = subtitleTrack.languageCode
+
+            videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
+                youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME:
+                    subtitleTrack.isDefault,
+                youtube.EXERCISE_URL_KEY_NAME:
+                    url_for('exercise', videoId=videoId, languageCode=langCode)}
+
+        videos.append(videoDict)
 
     return render_template("index.html", videos=videos)
 
@@ -117,8 +133,6 @@ def exercise(videoId=None,
     submitExerciseForm = SubmitExerciseForm()
 
     if submitExerciseForm.validate_on_submit():
-        print('hola')
-        print(request.args)
         return
 
     videoInfo = youtube.getVideoInfo(videoId,
@@ -149,11 +163,62 @@ def __populateVideoInfoUrls(inVideoInfo):
     '''
     '''
     for langCode, subDict in inVideoInfo[youtube.SUBTITLES_KEY_NAME].items():
-
         videoUrl = url_for('exercise',
                            videoId=inVideoInfo['id'],
                            languageCode=langCode)
         subDict[youtube.EXERCISE_URL_KEY_NAME] = videoUrl
+
+
+@app.shell_context_processor
+def make_shell_context():
+
+    def initDatabase():
+
+        print('INITIALIZING DATABASE!')
+
+        ########## Init database #########################################################
+        youtubeLinks = [
+            'https://www.youtube.com/watch?v=Xou0au6OSZU',
+            'https://www.youtube.com/watch?v=d-xDKpEzmG8',
+            'https://www.youtube.com/watch?v=UOgvbS4GkF0',
+            'https://www.youtube.com/watch?v=AYEWsLdLmcc&t=272s',
+            'https://www.youtube.com/watch?v=YfrVfj2FlW8',
+            'https://www.youtube.com/watch?v=QbyGgn4lDi4'
+        ]
+
+        import models
+        db.drop_all()
+        db.create_all()
+
+        for youtubeLink in youtubeLinks:
+
+            youtubeId = youtube.getVideoId(youtubeLink)
+            videoInfo = youtube.getVideoInfo(youtubeId)
+
+            if not videoInfo:
+                print('SKIPPING {0}'.format(youtubeId))
+                continue
+
+            videoDB = models.Video(id=youtubeId,
+                                   title=videoInfo['title'])
+
+            db.session.add(videoDB)
+
+            videoDB = models.Video.query.get(youtubeId)
+
+            for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
+
+                subTrackDB = models.SubtitleTrack(
+                    languageCode=languageCode,
+                    isDefault=bool(subDict[youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME]),
+                    videoIdLink=videoDB
+                    )
+
+                db.session.add(subTrackDB)
+
+        db.session.commit()
+
+    return {'db': db, 'i': initDatabase()}
 
 if __name__ == "__main__":
     app.run()

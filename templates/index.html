@@ -5,8 +5,8 @@
     {% for videoInfo in videos %}
         <h2>{{ videoInfo['title'] }}</h2>
 
-        <img width="256px" src="{{ videoInfo['thumbnail_url'] }}">
-        <p>{{ videoInfo['author_name'] }}</p>
+        <img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}">
+        <!-- <p>{{ videoInfo['author_name'] }}</p> -->
         {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if subtitleDict['isDefault'] %}
             <p>
                 <span>Video's language: </span>

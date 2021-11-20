@@ -8,23 +8,16 @@ import youtube_transcript_api
 import constants
 import language
 
-# Used to validate a youtube url and extract it's videoId.
 YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<code>[\w\-]+)(\S+)?$')
+
+# Video title key name, extracted from getVideoBasicInfo Fn.
+ID_KEY_NAME = 'id'
 
 # Video title key name, extracted from getVideoBasicInfo Fn.
 TITLE_KEY_NAME = 'title'
 
-# Video thumbnail key name, extracted from getVideoBasicInfo Fn.
-THUMBNAIL_URL_KEY_NAME = 'thumbnail_url'
-
-#todo!
-DEFAULT_LANG_NAME = 'defaultLang'
-
 # Video subtitles info key name, extracted from  YouTubeTranscriptApi.list_transcripts Fn.
 SUBTITLES_KEY_NAME = 'subtitlesDict'
-
-#todo!
-DEFAULT_LANGUAGE_KEY_NAME = 'defaultLanguage'
 
 #todo!
 EXERCISE_URL_KEY_NAME = 'exerciseUrl'
@@ -114,7 +107,6 @@ def getVideoInfo(inYoutubeId,
                 {'isDefault': bool}
             ...
         }
-
     '''
     videoInfoDict = getVideoBasicInfo(inYoutubeId)
 
