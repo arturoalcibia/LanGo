@@ -25,6 +25,9 @@ EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 # Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
 TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 
+# Transcript text name. Stored in the DB as text.
+TRANSCRIPT_TEXT_KEY_NAME = 'transcriptText'
+
 # Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
 IS_DEFAULT_TRANSCRIPT_KEY_NAME = 'isDefault'
 
@@ -108,14 +111,11 @@ def getVideoInfo(inYoutubeId,
             ...
         }
     '''
-    videoInfoDict = getVideoBasicInfo(inYoutubeId)
-
-    if not videoInfoDict:
-        return
-
+    videoInfoDict = {}
     videoInfoDict['id'] = inYoutubeId
     youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
     videoInfoDict['link'] = youtubeLink
+
     try:
         transcripts = youtube_transcript_api.YouTubeTranscriptApi.list_transcripts(inYoutubeId)
     except youtube_transcript_api._errors.TranscriptsDisabled:

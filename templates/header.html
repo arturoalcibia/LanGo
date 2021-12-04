@@ -21,8 +21,11 @@
                             </a>
                         </li>
                         <li>
-                            <a href="#home">
-                                <span>Profile</span>
+                            {% if current_user.is_anonymous %}
+                            <a href="{{ url_for('profile') }}">Profile</a>
+                            {% else %}
+                            <a href="{{ url_for('profile') }}">{{ current_user.username }}</a>
+                            {% endif %}
                             </a>
                         </li>
                     </ul>

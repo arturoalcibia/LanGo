@@ -1,14 +1,20 @@
 from flask import Flask
 from flask import redirect
 from flask import render_template
-from flask import url_for
+from flask import url_for, flash, request
+from flask_login import LoginManager
+from flask_login import login_user, logout_user, current_user, login_required
+
 
 import constants
 from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
 from forms.submitExercise import SubmitExerciseForm
+from forms.login import LoginForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+
+from werkzeug.urls import url_parse
 
 from config import Config
 import youtube
@@ -20,12 +26,39 @@ app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+login = LoginManager(app)
+login.login_view = 'login'
 
 import models
+import api
 
-@app.route("/header")
-def header():
-    return render_template("header.html")
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = models.User.query.filter_by(username=form.username.data).first()
+        if user is None or not user.checkPassword(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        if not next_page or url_parse(next_page).netloc != '':
+            next_page = url_for('index')
+        return redirect(next_page)
+    return render_template('login.html', title='Sign In', form=form)
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return 'REGISTER'
+
+@app.route("/profile")
+@login_required
+def profile():
+    return render_template('profile.html')
+
 
 @app.route("/")
 @app.route("/index")
@@ -43,13 +76,13 @@ def index():
                      youtube.TITLE_KEY_NAME     : video.title ,
                      youtube.SUBTITLES_KEY_NAME : {}          }
 
-        for subtitleTrack in video.subtitleTracks.all():
+        for subtitle in video.subtitles.all():
 
-            langCode = subtitleTrack.languageCode
+            langCode = subtitle.languageCode
 
             videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
                 youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME:
-                    subtitleTrack.isDefault,
+                    subtitle.isDefault,
                 youtube.EXERCISE_URL_KEY_NAME:
                     url_for('exercise', videoId=videoId, languageCode=langCode)}
 
@@ -135,9 +168,11 @@ def exercise(videoId=None,
     if submitExerciseForm.validate_on_submit():
         return
 
-    videoInfo = youtube.getVideoInfo(videoId,
-                                     inLanguageCode=languageCode)
-    __populateVideoInfoUrls(videoInfo)
+    # Look up video in DB, if not, fetch from LanGo youtube api.
+    videoInfo = api.getVideoInfo(videoId)
+
+    # todo: Is it needed?
+    #__populateVideoInfoUrls(videoInfo)
 
     if not videoInfo:
         return 'Not valid url'
@@ -147,11 +182,20 @@ def exercise(videoId=None,
 
     subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
 
-    if not subDict:
-        return '{0} Not found.'.format(languageCode)
+    #todo in API!
+    #if not subDict:
+    #    return '{0} Not found.'.format(languageCode)
 
-    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-    youtube.formatTranscript(subList)
+    # todo in API!
+    #if videoDB:
+    #    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME]
+    #else:
+    #    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
+
+    #TODO! WHY BOTHER!! DO THIS FROM THE BEGINNING
+    youtube.formatTranscript(subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME])
+
+    subList = subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME]
 
     return render_template('exercise.html',
                            videoId=videoId,
@@ -174,7 +218,15 @@ def make_shell_context():
 
     def initDatabase():
 
+        import models
+        db.drop_all()
+        db.create_all()
+
         print('INITIALIZING DATABASE!')
+
+        heyUser = models.User(username='hey')
+        heyUser.setPassword('111')
+        db.session.add(heyUser)
 
         ########## Init database #########################################################
         youtubeLinks = [
@@ -185,10 +237,6 @@ def make_shell_context():
             'https://www.youtube.com/watch?v=YfrVfj2FlW8',
             'https://www.youtube.com/watch?v=QbyGgn4lDi4'
         ]
-
-        import models
-        db.drop_all()
-        db.create_all()
 
         for youtubeLink in youtubeLinks:
 
@@ -208,9 +256,10 @@ def make_shell_context():
 
             for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
-                subTrackDB = models.SubtitleTrack(
+                subTrackDB = models.Subtitle(
                     languageCode=languageCode,
                     isDefault=bool(subDict[youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME]),
+                    text=models.Subtitle.dictToString(subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()),
                     videoIdLink=videoDB
                     )
 
@@ -218,7 +267,10 @@ def make_shell_context():
 
         db.session.commit()
 
-    return {'db': db, 'i': initDatabase()}
+    return { 'db': db            ,
+             'i': initDatabase() ,
+             #'e': exit()
+                                 }
 
 if __name__ == "__main__":
     app.run()
