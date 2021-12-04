@@ -3,8 +3,11 @@ import json
 import youtube
 import models
 
+from app import db
+
 def getVideoInfo(inYoutubeId,
-                 **inKwargs):
+                 inLanguageCode=None,
+                 inOnlyManualSubtitlesBool=True):
     '''Checks if passed youtube Id is valid. Returns a video's information.
 
     Args:
@@ -14,11 +17,6 @@ def getVideoInfo(inYoutubeId,
         inOnlyManualSubtitlesBool (str): Retrieve only manually created subtitles.
         inVideoDB (models.Video): Video database object to locally query all video Info.
     '''
-
-    inLanguageCode = inKwargs.get('inLanguageCode')
-    inOnlyManualSubtitlesBool = inKwargs.get('inOnlyManualSubtitlesBool')
-    inVideoDB = inKwargs.get('inVideoDB')
-
     # Check for basic info to make sure it can be embedded.
     videoInfoDict = youtube.getVideoBasicInfo(inYoutubeId)
 
@@ -42,6 +40,40 @@ def getVideoInfo(inYoutubeId,
                                      subtitleDB.languageCode     ,
                                      subDict                     )
     else:
-        youtube.getVideoInfo()
+        #todo!
+        pass
 
     return videoInfoDict
+
+def storeVideoInfo(inYoutubeId):
+    '''
+    '''
+
+    videoDB = models.Video.query.get(inYoutubeId)
+
+    if videoDB:
+        return
+
+    videoInfo = youtube.getVideoInfo(inYoutubeId)
+
+    if not videoInfo:
+        return
+
+    videoDB = models.Video(id=inYoutubeId,
+                           title=videoInfo['title'])
+
+    db.session.add(videoDB)
+
+    #todo! Why can't we use obj above?
+    videoDB = models.Video.query.get(inYoutubeId)
+
+    for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
+        subTrackDB = models.Subtitle(
+            languageCode=languageCode,
+            isDefault=bool(subDict[youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME]),
+            text=models.Subtitle.dictToString(subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()),
+            videoIdLink=videoDB)
+
+        db.session.add(subTrackDB)
+
+    db.session.commit()

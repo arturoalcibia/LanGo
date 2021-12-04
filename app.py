@@ -241,31 +241,8 @@ def make_shell_context():
         for youtubeLink in youtubeLinks:
 
             youtubeId = youtube.getVideoId(youtubeLink)
-            videoInfo = youtube.getVideoInfo(youtubeId)
 
-            if not videoInfo:
-                print('SKIPPING {0}'.format(youtubeId))
-                continue
-
-            videoDB = models.Video(id=youtubeId,
-                                   title=videoInfo['title'])
-
-            db.session.add(videoDB)
-
-            videoDB = models.Video.query.get(youtubeId)
-
-            for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
-
-                subTrackDB = models.Subtitle(
-                    languageCode=languageCode,
-                    isDefault=bool(subDict[youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME]),
-                    text=models.Subtitle.dictToString(subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()),
-                    videoIdLink=videoDB
-                    )
-
-                db.session.add(subTrackDB)
-
-        db.session.commit()
+            api.storeVideoInfo(youtubeId)
 
     return { 'db': db            ,
              'i': initDatabase() ,

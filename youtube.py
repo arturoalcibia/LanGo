@@ -111,11 +111,14 @@ def getVideoInfo(inYoutubeId,
             ...
         }
     '''
-    videoInfoDict = {}
+    videoInfoDict = getVideoBasicInfo(inYoutubeId)
+
+    if not videoInfoDict:
+        return
+
     videoInfoDict['id'] = inYoutubeId
     youtubeLink = 'https://www.youtube.com/watch?v={0}'.format(inYoutubeId)
     videoInfoDict['link'] = youtubeLink
-
     try:
         transcripts = youtube_transcript_api.YouTubeTranscriptApi.list_transcripts(inYoutubeId)
     except youtube_transcript_api._errors.TranscriptsDisabled:
