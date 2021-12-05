@@ -186,21 +186,10 @@ def exercise(videoId=None,
     #if not subDict:
     #    return '{0} Not found.'.format(languageCode)
 
-    # todo in API!
-    #if videoDB:
-    #    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME]
-    #else:
-    #    subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-
-    #TODO! WHY BOTHER!! DO THIS FROM THE BEGINNING
-    youtube.formatTranscript(subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME])
-
-    subList = subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME]
-
     return render_template('exercise.html',
                            videoId=videoId,
                            languageCode=languageCode,
-                           subList=subList,
+                           subList=subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME],
                            submitExerciseForm=submitExerciseForm)
 
 def __populateVideoInfoUrls(inVideoInfo):

@@ -21,18 +21,11 @@ class Subtitle(db.Model):
     languageCode = db.Column(db.String(4), index=True)
     text = db.Column(db.Text())
     isDefault = db.Column(db.Boolean())
+    subUpvotes = db.relationship('User', secondary=upvotes, backref='user_upvotes', lazy='dynamic')
     videoId = db.Column(db.String, db.ForeignKey('video.id'))
 
     def __repr__(self):
         return '<Video {} - {}>'.format(self.videoId, self.languageCode)
-
-    @staticmethod
-    def dictToString(inDict):
-        #todo! remove!
-        return json.dumps(inDict)
-
-    def getTextDict(self):
-        return json.loads(self.text)
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)

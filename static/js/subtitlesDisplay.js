@@ -70,7 +70,7 @@ function __getClosestSubtitle(inTime, inNext=true){
 function __goTo(inPrevious=false) {
   __clearIntervals();
   // Remove any visible subtitles.
-  var visibleSubs = document.getElementsByClassName('visible');
+  const visibleSubs = document.getElementsByClassName('visible');
 
   newStartSub = null;
 
@@ -90,8 +90,9 @@ function __goTo(inPrevious=false) {
       }
     }
 
-    else
+    else{
       newStartSub = visibleSubs[visibleSubs.length - 1].nextElementSibling;
+    }
   }
 
   if (newStartSub === null || !newStartSub.classList.contains('sub'))
@@ -205,7 +206,10 @@ function __getSubFromTime(inTime){
 
 function __isTimeBetweenRange(inCurrentTime, inDiv){
   // Return true if div dataset start and end are between the provided time.
-  return (inCurrentTime >= inDiv.dataset.start && inCurrentTime <= inDiv.dataset.end)
+  // NOTE: Adding handles to dataset.end/start since a sub could same start/end times.
+  //       In those cases, we'd prioritize the sub where the start matches rather than the
+  //       where the end does.
+  return (inCurrentTime >= inDiv.dataset.start - 0.1 && inCurrentTime <= inDiv.dataset.end - 0.1)
 }
 
 function __isTimeGreater(inCurrentTime, inDiv){
