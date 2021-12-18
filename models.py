@@ -4,9 +4,14 @@ from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-upvotes = db.Table('upvotes',
-                   db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
-                   db.Column('sub_id', db.Integer, db.ForeignKey('subtitle.id')))
+class Vote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    userId = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user = db.relationship('User', backref=db.backref('user_sub_votes'))
+    subtitleId = db.Column(db.Integer, db.ForeignKey('subtitle.id'))
+    subtitle = db.relationship('Subtitle', backref=db.backref('all_sub_votes'))
+    upvote = db.Column(db.Boolean, nullable=False)
+
 
 class Video(db.Model):
     id = db.Column(db.String, primary_key=True)
@@ -21,7 +26,6 @@ class Subtitle(db.Model):
     languageCode = db.Column(db.String(4), index=True)
     text = db.Column(db.Text())
     isDefault = db.Column(db.Boolean())
-    subUpvotes = db.relationship('User', secondary=upvotes, backref='user_upvotes', lazy='dynamic')
     videoId = db.Column(db.String, db.ForeignKey('video.id'))
 
     def __repr__(self):

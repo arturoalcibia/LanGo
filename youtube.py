@@ -28,9 +28,6 @@ TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 # Transcript text name. Stored in the DB as text.
 TRANSCRIPT_TEXT_KEY_NAME = 'transcriptText'
 
-# Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
-IS_DEFAULT_TRANSCRIPT_KEY_NAME = 'isDefault'
-
 
 def formatTranscript(inTranscriptList):
     ''' Format transcript by:
@@ -134,8 +131,7 @@ def getVideoInfo(inYoutubeId,
         if inLanguageCode and inLanguageCode not in manuallyCreatedTranscriptsDict.keys():
             return
 
-    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj,
-                                              IS_DEFAULT_TRANSCRIPT_KEY_NAME:transcriptObj.is_default}
+    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj}
                                          for key, transcriptObj
                                          in manuallyCreatedTranscriptsDict.items()}
 

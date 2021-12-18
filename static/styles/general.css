@@ -2,5 +2,10 @@ p {
      line-height: 5px;
 }
 button {
-     line-height: 5px;
+     line-height: 15px;
+}
+
+.voted {
+    background:green;
+    line-height: 15px;
 }

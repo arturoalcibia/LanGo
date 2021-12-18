@@ -1,7 +1,7 @@
 from flask import Flask
 from flask import redirect
 from flask import render_template
-from flask import url_for, flash, request
+from flask import url_for, flash, request, jsonify
 from flask_login import LoginManager
 from flask_login import login_user, logout_user, current_user, login_required
 
@@ -81,10 +81,13 @@ def index():
             langCode = subtitle.languageCode
 
             videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
-                youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME:
-                    subtitle.isDefault,
+                'voted':
+                    True,
                 youtube.EXERCISE_URL_KEY_NAME:
-                    url_for('exercise', videoId=videoId, languageCode=langCode)}
+                    url_for('exercise', videoId=videoId, languageCode=langCode),
+                'id':
+                    subtitle.id,
+            }
 
         videos.append(videoDict)
 
@@ -200,6 +203,42 @@ def __populateVideoInfoUrls(inVideoInfo):
                            videoId=inVideoInfo['id'],
                            languageCode=langCode)
         subDict[youtube.EXERCISE_URL_KEY_NAME] = videoUrl
+
+@app.route("/vote/<int:inSubtitleId>/<inVoteValue>")
+def vote(inSubtitleId,
+         inVoteValue):
+
+    if not current_user.is_authenticated:
+        return '', 403
+
+    inSubIdDB = models.Subtitle.query.get_or_404(inSubtitleId)
+    vote = models.Vote.query.filter_by(user=current_user, subtitle=inSubIdDB).first()
+    valueBool = True if inVoteValue == 'upvote' else False
+
+    if vote:
+        if vote.upvote != valueBool:
+            vote.upvote = valueBool
+            db.session.commit()
+        else:
+            return '', 403
+
+    else:
+        vote = models.Vote(user=current_user, subtitle=inSubIdDB, upvote=bool(inVoteValue))
+        db.session.add(vote)
+        db.session.commit()
+
+    return '', 200
+
+@app.route('/votecount/<int:inSubtitleId>')
+def getVotes(inSubtitleId):
+
+    if not current_user.is_authenticated:
+        return '', 403
+
+    inSubIdDB = models.Subtitle.query.get_or_404(inSubtitleId)
+
+    voteValues = [vote.upvote for vote in inSubIdDB.all_sub_votes]
+    return jsonify(voteValues.count(True) - voteValues.count(False)), 200
 
 
 @app.shell_context_processor

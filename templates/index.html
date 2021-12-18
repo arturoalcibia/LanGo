@@ -7,15 +7,47 @@
 
         <img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}">
         <!-- <p>{{ videoInfo['author_name'] }}</p> -->
-        {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if subtitleDict['isDefault'] %}
+        {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
             <p>
                 <span>Video's language: </span>
                 <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleCode }}</a>
-                <span>-> </span><span>0</span><span> upvotes</span>
-                <span>0</span><span> downvotes</span>
+                <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i> Downvote </i></button>
+                <span id="vote_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}">0</span>
+                <button onclick="vote({{ subtitleDict['id'] }}, 'upvote')" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == True }} ><i> Upvote </i></button>
             </p>
         {% endfor %}
 
     {% endfor %}
+
+    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+
+    <script>
+
+      function vote(inId, inVoteValueStr) {
+        $.ajax(
+            {url: "/vote/" + inId + "/" + inVoteValueStr, success: function(){
+
+                if (inVoteValueStr === 'upvote')
+                    voteInt = 1;
+                else
+                    voteInt = -1;
+
+                const voteSpan = $('#vote_' + inId);
+                const currentAmount = parseInt(voteSpan.text());
+                voteSpan.text(currentAmount + voteInt);
+        }});
+      }
+
+      $( ".voteSpan" ).each(function() {
+          const voteSpan = $( this );
+          $.ajax(
+            {url: "/votecount/" + voteSpan.data('db'), success: function( result ){
+                voteSpan.text( result );
+          }});
+      });
+
+    </script>
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/general.css') }}">
 
 {% endblock %}

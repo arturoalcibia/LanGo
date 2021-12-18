@@ -32,8 +32,7 @@ def getVideoInfo(inYoutubeId,
             if inLanguageCode and inLanguageCode != subtitleDB.languageCode:
                 continue
 
-            subDict = {youtube.TRANSCRIPT_TEXT_KEY_NAME       : json.loads(subtitleDB.text) ,
-                       youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME : subtitleDB.isDefault        }
+            subDict = {youtube.TRANSCRIPT_TEXT_KEY_NAME       : json.loads(subtitleDB.text)}
 
             videoInfoDict.setdefault( youtube.SUBTITLES_KEY_NAME ,
                                      {}                          ).setdefault(
@@ -75,7 +74,6 @@ def storeVideoInfo(inYoutubeId):
 
         subTrackDB = models.Subtitle(
             languageCode=languageCode,
-            isDefault=bool(subDict[youtube.IS_DEFAULT_TRANSCRIPT_KEY_NAME]),
             text=json.dumps(subList),
             videoIdLink=videoDB)
 
