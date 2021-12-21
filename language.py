@@ -1,4 +1,5 @@
 import constant.spanish
+import constants
 
 def splitSentence(inSentence):
     '''Splits a sentence by words. Adds a key if each word should be displayed or shown as blank
@@ -71,3 +72,20 @@ def splitSentence(inSentence):
         wordTuples.append((inSentence, False))
 
     return wordTuples
+
+def getLongLanguageName(inCode):
+    '''
+
+    Ex: en-GB
+    '''
+    inCodeSplit = inCode.split('-')
+
+    if len(inCodeSplit) == 1:
+        return constants.ISO_CODE_LANGUAGE_MAPPING.get(inCode, inCode)
+
+    if len(inCodeSplit) == 2:
+        return '-'.join( [ constants.ISO_CODE_LANGUAGE_MAPPING.get( inCodeSplit [ 0 ] , inCodeSplit[ 0 ] ) ,
+                           inCodeSplit[1]                                                                  ] )
+
+    else:
+        return inCode

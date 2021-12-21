@@ -7,6 +7,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 
 
 import constants
+import language
 from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
 from forms.submitExercise import SubmitExerciseForm
@@ -74,7 +75,9 @@ def index():
 
         videoDict = {youtube.ID_KEY_NAME        : videoId     ,
                      youtube.TITLE_KEY_NAME     : video.title ,
-                     youtube.SUBTITLES_KEY_NAME : {}          }
+                     youtube.SUBTITLES_KEY_NAME : {}          ,
+                     youtube.VIDEO_URL_KEY_NAME : url_for('exercise', videoId=videoId) ,
+                     }
 
         for subtitle in video.subtitles.all():
 
@@ -87,6 +90,8 @@ def index():
                     url_for('exercise', videoId=videoId, languageCode=langCode),
                 'id':
                     subtitle.id,
+                youtube.LONG_LANGUAGE_KEY_NAME:
+                    language.getLongLanguageName(langCode),
             }
 
         videos.append(videoDict)
@@ -160,8 +165,11 @@ def browseUrl(videoId=None):
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
 
-@app.route('/exercise/<videoId>/<languageCode>')
+
+
 @app.route('/exercise', methods=("POST",))
+@app.route('/exercise/<videoId>')
+@app.route('/exercise/<videoId>/<languageCode>')
 def exercise(videoId=None,
              languageCode=None):
     '''

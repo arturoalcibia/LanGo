@@ -22,6 +22,10 @@ SUBTITLES_KEY_NAME = 'subtitlesDict'
 #todo!
 EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 
+VIDEO_URL_KEY_NAME = 'videoUrl'
+
+LONG_LANGUAGE_KEY_NAME = 'longLanguage'
+
 # Transcript obj name, extracted from  YouTubeTranscriptApi.list_transcripts. Fn.
 TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 
