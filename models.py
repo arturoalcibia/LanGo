@@ -1,5 +1,3 @@
-import json
-
 from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,6 +22,7 @@ class Video(db.Model):
 class Subtitle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     languageCode = db.Column(db.String(4), index=True)
+    languageShortCode = db.Column(db.String(2), index=True)
     text = db.Column(db.Text())
     isDefault = db.Column(db.Boolean())
     videoId = db.Column(db.String, db.ForeignKey('video.id'))

@@ -5,7 +5,7 @@ import requests
 from youtubesearchpython import *
 import youtube_transcript_api
 
-import constants
+from constant import constants
 import language
 
 YOUTUBE_URL_RE = re.compile('^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube\.com|youtu.be))(\/(?:[\w\-]+\?v=|embed\/|v\/)?)(?P<code>[\w\-]+)(\S+)?$')

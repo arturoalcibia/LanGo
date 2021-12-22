@@ -1,13 +1,13 @@
+####### todo!!!: add languages to profile sign up/ profile page!
+
 from flask import Flask
 from flask import redirect
 from flask import render_template
 from flask import url_for, flash, request, jsonify
 from flask_login import LoginManager
-from flask_login import login_user, logout_user, current_user, login_required
+from flask_login import login_user, current_user, login_required
 
-
-import constants
-import language
+from constant import constants
 from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
 from forms.submitExercise import SubmitExerciseForm
@@ -60,7 +60,6 @@ def register():
 def profile():
     return render_template('profile.html')
 
-
 @app.route("/")
 @app.route("/index")
 def index():
@@ -68,33 +67,10 @@ def index():
     Gets redirected if a session exists.
     '''
 
-    videos = []
-    for video in models.Video.query.all():
-
-        videoId = video.id
-
-        videoDict = {youtube.ID_KEY_NAME        : videoId     ,
-                     youtube.TITLE_KEY_NAME     : video.title ,
-                     youtube.SUBTITLES_KEY_NAME : {}          ,
-                     youtube.VIDEO_URL_KEY_NAME : url_for('exercise', videoId=videoId) ,
-                     }
-
-        for subtitle in video.subtitles.all():
-
-            langCode = subtitle.languageCode
-
-            videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
-                'voted':
-                    True,
-                youtube.EXERCISE_URL_KEY_NAME:
-                    url_for('exercise', videoId=videoId, languageCode=langCode),
-                'id':
-                    subtitle.id,
-                youtube.LONG_LANGUAGE_KEY_NAME:
-                    language.getLongLanguageName(langCode),
-            }
-
-        videos.append(videoDict)
+    if current_user.is_authenticated:
+        videos = api.getVideoPreviewsInfo()
+    else:
+        videos = api.getVideoPreviewsInfo(inByLanguages=['es'])
 
     return render_template("index.html", videos=videos)
 
@@ -164,9 +140,6 @@ def browseUrl(videoId=None):
 
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
-
-
-
 @app.route('/exercise', methods=("POST",))
 @app.route('/exercise/<videoId>')
 @app.route('/exercise/<videoId>/<languageCode>')
@@ -192,10 +165,6 @@ def exercise(videoId=None,
         return 'No provided language'
 
     subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
-
-    #todo in API!
-    #if not subDict:
-    #    return '{0} Not found.'.format(languageCode)
 
     return render_template('exercise.html',
                            videoId=videoId,

@@ -1,13 +1,73 @@
+from  sqlalchemy.sql.expression import func
+
+from flask import url_for, flash, request, jsonify
+
 import json
 
+import constant.constants
 import youtube
+import language
 import models
 
 from app import db
 
+def getVideoPreviewInfo(inVideo):
+    videoId = inVideo.id
+
+    videoDict = {youtube.ID_KEY_NAME: videoId,
+                 youtube.TITLE_KEY_NAME: inVideo.title,
+                 youtube.SUBTITLES_KEY_NAME: {},
+                 youtube.VIDEO_URL_KEY_NAME: url_for('exercise', videoId=videoId),
+                 }
+
+    for subtitle in inVideo.subtitles.all():
+        langCode = subtitle.languageCode
+
+        videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
+            'voted':
+                True,
+            youtube.EXERCISE_URL_KEY_NAME:
+                url_for('exercise', videoId=videoId, languageCode=langCode),
+            'id':
+                subtitle.id,
+            youtube.LONG_LANGUAGE_KEY_NAME:
+                language.getLongLanguageName(langCode),
+        }
+
+    return videoDict
+
+def getVideoPreviewsInfo(inByLanguages=None):
+    '''
+    '''
+    videos = []
+
+    if inByLanguages:
+        # todo: can it be optimized?
+        for languageCode in inByLanguages:
+            for video in models.Video.query.filter(
+                    models.Video.subtitles.any(
+                        languageCode=languageCode)).limit(constant.constants.RECCOMMENDATIONS_LIMIT):
+                videos.append(getVideoPreviewInfo(video))
+
+    else:
+        '''
+        https://stackoverflow.com/questions/11005391/shuffling-sqlalchemy-results/11007820
+        
+        if you are using MySQL, you can do:
+            from sqlalchemy.sql.expression import func
+            Item.query.order_by(func.rand()).offset(20).limit(10).all()
+        
+        Or, in PostgreSQL:
+            from sqlalchemy.sql.expression import func
+            Item.query.order_by(func.random()).offset(20).limit(10).all()
+        '''
+        for video in models.Video.query.order_by(func.random()).limit(2).all():
+            videos.append(getVideoPreviewInfo(video))
+
+    return videos
+
 def getVideoInfo(inYoutubeId,
-                 inLanguageCode=None,
-                 inOnlyManualSubtitlesBool=True):
+                 inLanguageCode=None):
     '''Checks if passed youtube Id is valid. Returns a video's information.
 
     Args:
@@ -63,9 +123,6 @@ def storeVideoInfo(inYoutubeId):
 
     db.session.add(videoDB)
 
-    #todo! Why can't we use obj above?
-    videoDB = models.Video.query.get(inYoutubeId)
-
     for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
         subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
@@ -74,6 +131,7 @@ def storeVideoInfo(inYoutubeId):
 
         subTrackDB = models.Subtitle(
             languageCode=languageCode,
+            languageShortCode=languageCode.split('-')[0],
             text=json.dumps(subList),
             videoIdLink=videoDB)
 

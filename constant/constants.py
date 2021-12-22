@@ -1,6 +1,9 @@
 # Number of videos to display when browsing.
 SEARCH_LIMIT = 1
 
+# Number of videos to dislay on the reccomendations page.
+RECCOMMENDATIONS_LIMIT = 5
+
 # Number of times to retry a query if no videos are found.
 RETRY_LIMIT = 1
 

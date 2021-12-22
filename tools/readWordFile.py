@@ -1,5 +1,5 @@
 # move to tools
-file1 = open('spanish.txt', 'r', encoding="utf-8")
+file1 = open('../constant/spanish.txt', 'r', encoding="utf-8")
 for index, txt in enumerate(file1.readlines()):
 
     txt = txt.strip().split(' ')[0]
