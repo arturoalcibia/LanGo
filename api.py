@@ -1,6 +1,6 @@
 from  sqlalchemy.sql.expression import func
 
-from flask import url_for, flash, request, jsonify
+from flask import url_for
 
 import json
 
@@ -11,7 +11,9 @@ import models
 
 from app import db
 
-def getVideoPreviewInfo(inVideo):
+def getVideoPreviewInfo( inVideo                 ,
+                         inLanguageCodes  = None ,
+                         inLimitLanguages = None ):
     videoId = inVideo.id
 
     videoDict = {youtube.ID_KEY_NAME: videoId,
@@ -22,6 +24,14 @@ def getVideoPreviewInfo(inVideo):
 
     for subtitle in inVideo.subtitles.all():
         langCode = subtitle.languageCode
+
+        #todo! can be changed to direct sql query?
+        if inLanguageCodes and langCode not in inLanguageCodes:
+            continue
+
+        # todo! can be changed to direct sql query?
+        if inLimitLanguages and len(videoDict[youtube.SUBTITLES_KEY_NAME]) >= inLimitLanguages:
+            break
 
         videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
             'voted':
@@ -36,8 +46,13 @@ def getVideoPreviewInfo(inVideo):
 
     return videoDict
 
-def getVideoPreviewsInfo(inByLanguages=None):
+def getVideoPreviewsInfo(inByLanguages    = None ,
+                         inLimitLanguages = None ,
+                         inLimitVideos    = constant.constants.RECCOMMENDATIONS_LIMIT ):
     '''
+    Args:
+        inByLanguages (list): List of languages' subtitles to retrieve from a video if any.
+        inLimitLanguages (int): Limit languages.
     '''
     videos = []
 
@@ -46,8 +61,11 @@ def getVideoPreviewsInfo(inByLanguages=None):
         for languageCode in inByLanguages:
             for video in models.Video.query.filter(
                     models.Video.subtitles.any(
-                        languageCode=languageCode)).limit(constant.constants.RECCOMMENDATIONS_LIMIT):
-                videos.append(getVideoPreviewInfo(video))
+                        languageCode=languageCode)).limit(inLimitVideos):
+                videos.append(
+                    getVideoPreviewInfo( video                               ,
+                                         inLanguageCodes  = inByLanguages    ,
+                                         inLimitLanguages = inLimitLanguages ) )
 
     else:
         '''
@@ -62,7 +80,10 @@ def getVideoPreviewsInfo(inByLanguages=None):
             Item.query.order_by(func.random()).offset(20).limit(10).all()
         '''
         for video in models.Video.query.order_by(func.random()).limit(2).all():
-            videos.append(getVideoPreviewInfo(video))
+            videos.append(
+                getVideoPreviewInfo( video                             ,
+                                     inLanguageCodes=inByLanguages     ,
+                                     inLimitLanguages=inLimitLanguages ) )
 
     return videos
 

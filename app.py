@@ -70,7 +70,8 @@ def index():
     if current_user.is_authenticated:
         videos = api.getVideoPreviewsInfo()
     else:
-        videos = api.getVideoPreviewsInfo(inByLanguages=['es'])
+        #videos = api.getVideoPreviewsInfo(inByLanguages=['es', 'en'])
+        videos = api.getVideoPreviewsInfo( inLimitLanguages = 2 )
 
     return render_template("index.html", videos=videos)
 
