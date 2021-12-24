@@ -219,6 +219,17 @@ def getVotes(inSubtitleId):
     return jsonify(voteValues.count(True) - voteValues.count(False)), 200
 
 
+@app.route('/contact')
+def contact():
+
+    # todo! if logged in no need to display email and name, display them as hidden instead.
+    return render_template(
+        'contact.html',
+        inGoogleForm='https://docs.google.com/forms/d/e/1FAIpQLSfKX9L1mJ1A-xLANA3LH9RKJvs-gYELVDLFu9XN3leUKhjUDw',
+        inNameId=1857853291,
+        inEmailId=1674025034,
+        inCommentId=1749810715)
+
 @app.shell_context_processor
 def make_shell_context():
 

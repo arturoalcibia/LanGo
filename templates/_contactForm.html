@@ -1,0 +1,9 @@
+<script type="text/javascript">var submitted=false;</script>
+<iframe name="hidden_iframe" id="hidden_iframe" style="display:none;" onload="if(submitted)  {window.location='';}"></iframe>
+
+<form action="{{ inGoogleForm }}/formResponse" method="post" target="hidden_iframe" onsubmit="submitted=true;">
+    <input  name="entry.{{ inNameId }}" type="text" placeholder="Name"/>
+    <input  name="entry.{{ inEmailId }}" type="email" placeholder="Email"/>
+    <input  name="entry.{{ inCommentId }}" type="text" placeholder="Comment"/>
+    <input type="submit" value="Send" />
+</form>
