@@ -3,19 +3,7 @@
 {% block content %}
 
     {% for videoInfo in videos %}
-        <h2><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h2>
-
-        <a href="{{ videoInfo['videoUrl'] }}"><img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}"></a>
-        {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
-            <p>
-                <span>Video's language: </span>
-                <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleDict['longLanguage'] }}</a>
-                <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i> Downvote </i></button>
-                <span id="vote_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}">0</span>
-                <button onclick="vote({{ subtitleDict['id'] }}, 'upvote')" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == True }} ><i> Upvote </i></button>
-            </p>
-        {% endfor %}
-
+        {% include "_detailedVideo.html" %}
     {% endfor %}
 
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>

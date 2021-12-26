@@ -68,9 +68,9 @@ def index():
     '''
 
     if current_user.is_authenticated:
+        #todo! pass user's language.
         videos = api.getVideoPreviewsInfo()
     else:
-        #videos = api.getVideoPreviewsInfo(inByLanguages=['es', 'en'])
         videos = api.getVideoPreviewsInfo( inLimitLanguages = 2 )
 
     return render_template("index.html", videos=videos)
@@ -129,9 +129,9 @@ def browseUrl(videoId=None):
         return redirect(url_for('browseUrl', videoId=videoUrlForm.VIDEO_ID))
 
     if videoId:
-        videoInfo = youtube.getVideoInfo(videoId)
-        __populateVideoInfoUrls(videoInfo)
+        videoInfo = api.getVideoInfo(videoId)
 
+        #todo!!!
         if not videoInfo:
             return 'Not valid url'
 
@@ -156,14 +156,13 @@ def exercise(videoId=None,
     # Look up video in DB, if not, fetch from LanGo youtube api.
     videoInfo = api.getVideoInfo(videoId)
 
-    # todo: Is it needed?
-    #__populateVideoInfoUrls(videoInfo)
-
+    #todo!!!
     if not videoInfo:
         return 'Not valid url'
 
     if languageCode is None:
-        return 'No provided language'
+        return render_template('exercisePreview.html',
+                               videoInfo=videoInfo)
 
     subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
 

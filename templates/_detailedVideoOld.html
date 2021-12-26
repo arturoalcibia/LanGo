@@ -1,0 +1,20 @@
+<h2>{{ videoInfo['title'] }}</h2>
+
+<img width="256px" src="{{ videoInfo['thumbnail_url'] }}">
+<p>{{ videoInfo['author_name'] }}</p>
+{% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if subtitleDict['isDefault'] %}
+    <p>
+        <span>Video's language: </span>
+        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleCode }}</a>
+        <span>-> </span><span>0</span><span> upvotes</span>
+        <span>0</span><span> downvotes</span>
+    </p>
+{% endfor %}
+
+{% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if not subtitleDict['isDefault'] %}
+    <p>
+        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleCode }}</a>
+        <span>-> </span><span>0</span><span> upvotes</span>
+        <span>0</span><span> downvotes</span>
+    </p>
+{% endfor %}
