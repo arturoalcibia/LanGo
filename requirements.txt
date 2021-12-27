@@ -5,6 +5,7 @@ charset-normalizer==2.0.4
 click==8.0.1
 colorama==0.4.4
 Flask==2.0.1
+Flask-Login==0.5.0
 Flask-Migrate==3.1.0
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
@@ -29,3 +30,4 @@ Werkzeug==2.0.1
 WTForms==2.3.3
 youtube-dl==2021.6.6
 youtube-search-python==1.4.6
+youtube-transcript-api==0.4.2
