@@ -22,16 +22,16 @@ def getVideoPreviewInfo( inVideo                 ,
                  youtube.VIDEO_URL_KEY_NAME: url_for('exercise', videoId=videoId),
                  }
 
-    for subtitle in inVideo.subtitles.all():
+    if inLanguageCodes:
+        query = inVideo.subtitles.filter(models.Subtitle.language_id.in_(inLanguageCodes ))
+    else:
+        query = inVideo.subtitles
+
+    if inLimitLanguages:
+        query = query.limit( inLimitLanguages )
+
+    for subtitle in query.all():
         langCode = subtitle.languageCode
-
-        #todo! can be changed to direct sql query?
-        if inLanguageCodes and langCode not in inLanguageCodes:
-            continue
-
-        # todo! can be changed to direct sql query?
-        if inLimitLanguages and len(videoDict[youtube.SUBTITLES_KEY_NAME]) >= inLimitLanguages:
-            break
 
         videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
             'voted':
@@ -51,22 +51,25 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
                          inLimitVideos    = constant.constants.RECCOMMENDATIONS_LIMIT ):
     '''
     Args:
-        inByLanguages (list): List of languages' subtitles to retrieve from a video if any.
+        inByLanguages (list[models.Language]): List of languages' subtitles to retrieve from a video if any.
         inLimitLanguages (int): Limit languages.
     '''
     videos = []
 
     if inByLanguages:
+        languageShortCodes = [x.shortCode for x in inByLanguages]
 
-        # todo: can it be optimized?
-        for languageCode in inByLanguages:
-            for video in models.Video.query.filter(
-                models.Video.subtitles.any(
-                    languageCode=languageCode)).limit(inLimitVideos):
+        for subtitleDB in models.Subtitle.query.filter(
+            models.Subtitle.language_id.in_( languageShortCodes ) ).limit( inLimitVideos ).all():
 
-                videos.append( getVideoPreviewInfo( video                               ,
-                                                    inLanguageCodes  = inByLanguages    ,
-                                                    inLimitLanguages = inLimitLanguages ) )
+            videoDB = subtitleDB.videoIdLink
+
+            if videoDB in videos:
+                continue
+
+            videos.append( getVideoPreviewInfo( videoDB                               ,
+                                                inLanguageCodes  = languageShortCodes ,
+                                                inLimitLanguages = inLimitLanguages   ) )
 
     else:
         '''
@@ -148,11 +151,17 @@ def storeVideoInfo(inYoutubeId):
         #todo!! Improve structure!
         youtube.formatTranscript(subList)
 
+        languageDB = models.Language.query.get(languageCode.split('-')[0])
+
+        if not languageDB:
+            print('SKIPPING!!! {0} - {1}'.format(languageCode.split('-')[0], inYoutubeId))
+            continue
+
         subTrackDB = models.Subtitle(
             languageCode=languageCode,
-            languageShortCode=languageCode.split('-')[0],
             text=json.dumps(subList),
-            videoIdLink=videoDB)
+            videoIdLink=videoDB,
+            languageLink=languageDB)
 
         db.session.add(subTrackDB)
 

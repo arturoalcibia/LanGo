@@ -68,8 +68,7 @@ def index():
     '''
 
     if current_user.is_authenticated:
-        #todo! pass user's language.
-        videos = api.getVideoPreviewsInfo()
+        videos = api.getVideoPreviewsInfo(current_user.languages.all())
     else:
         videos = api.getVideoPreviewsInfo( inLimitLanguages = 2 )
 
@@ -240,7 +239,17 @@ def make_shell_context():
 
         print('INITIALIZING DATABASE!')
 
+        import constant.constants
+
+        for languageShortCode in constant.constants.ISO_CODE_LANGUAGE_MAPPING.keys():
+            languageDB = models.Language(shortCode=languageShortCode)
+            db.session.add(languageDB)
+
+        esLanguageDB = models.Language.query.get('es')
+        enLanguageDB = models.Language.query.get('en')
         heyUser = models.User(username='hey')
+        heyUser.languages.append(esLanguageDB)
+        heyUser.languages.append(enLanguageDB)
         heyUser.setPassword('111')
         db.session.add(heyUser)
 
@@ -249,15 +258,13 @@ def make_shell_context():
             'https://www.youtube.com/watch?v=Xou0au6OSZU',
             'https://www.youtube.com/watch?v=d-xDKpEzmG8',
             'https://www.youtube.com/watch?v=UOgvbS4GkF0',
-            'https://www.youtube.com/watch?v=AYEWsLdLmcc&t=272s',
-            'https://www.youtube.com/watch?v=YfrVfj2FlW8',
-            'https://www.youtube.com/watch?v=QbyGgn4lDi4'
+            #'https://www.youtube.com/watch?v=AYEWsLdLmcc&t=272s',
+            #'https://www.youtube.com/watch?v=YfrVfj2FlW8',
+            #'https://www.youtube.com/watch?v=QbyGgn4lDi4'
         ]
 
         for youtubeLink in youtubeLinks:
-
             youtubeId = youtube.getVideoId(youtubeLink)
-
             api.storeVideoInfo(youtubeId)
 
     return { 'db': db            ,
