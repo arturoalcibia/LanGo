@@ -14,50 +14,53 @@
     <body>
 
         <header class="header" id="header">
-            <div class="nav__menu" id="nav-menu">
-                <ul class="nav__list">
-                    <li class="nav__item">
-                        <a href="{{ url_for('index') }}" class="nav__link active-link">
-                            <i class='bx bx-home-alt nav__icon'></i>
-                            <span class="nav__name">LanGo</span>
-                        </a>
-                    </li>
+            <nav class="nav container">
 
-                    <li class="nav__item">
-                        <a href="{{ url_for('profile') }}" class="nav__link">
-                            <i class='bx bx-user nav__icon'></i>
-                            {% if current_user.is_anonymous %}
-                                <span class="nav__name">Log in</span>
-                            {% else %}
-                                <span class="nav__name">{{ current_user.username }}</span>
-                            {% endif %}
-                        </a>
-                    </li>
+                <div class="nav__menu" id="nav-menu">
+                    <ul class="nav__list">
+                        <li class="nav__item">
+                            <a href="{{ url_for('index') }}" class="nav__link active-link">
+                                <i class='bx bx-home-alt nav__icon'></i>
+                                <span class="nav__name">LanGo</span>
+                            </a>
+                        </li>
 
-                    <li class="nav__item">
-                        <a href="#skills" class="nav__link">
-                            <i class='bx bx-book-alt nav__icon'></i>
-                            <span class="nav__name">Skills</span>
-                        </a>
-                    </li>
+                        <li class="nav__item">
+                            <a href="{{ url_for('profile') }}" class="nav__link">
+                                <i class='bx bx-user nav__icon'></i>
+                                {% if current_user.is_anonymous %}
+                                    <span class="nav__name">Log in!</span>
+                                {% else %}
+                                    <span class="nav__name">{{ current_user.username }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
 
-                    <li class="nav__item">
-                        <a href="#portfolio" class="nav__link">
-                            <i class='bx bx-briefcase-alt nav__icon'></i>
-                            <span class="nav__name">Portfolio</span>
-                        </a>
-                    </li>
+                        <li class="nav__item">
+                            <a href="#skills" class="nav__link">
+                                <i class='bx bx-book-alt nav__icon'></i>
+                                <span class="nav__name">Skills</span>
+                            </a>
+                        </li>
 
-                    <li class="nav__item">
-                        <a href="#contactme" class="nav__link">
-                            <i class='bx bx-message-square-detail nav__icon'></i>
-                            <span class="nav__name">Contactme</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
+                        <li class="nav__item">
+                            <a href="#portfolio" class="nav__link">
+                                <i class='bx bx-briefcase-alt nav__icon'></i>
+                                <span class="nav__name">Portfolio</span>
+                            </a>
+                        </li>
 
-            <img src="" alt="" class="nav__img">
+                        <li class="nav__item">
+                            <a href="#contactme" class="nav__link">
+                                <i class='bx bx-message-square-detail nav__icon'></i>
+                                <span class="nav__name">Contactme</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+
+                <img src="" alt="" class="nav__img">
+            </nav>
         </header>
 
         {% block content %}{% endblock %}
