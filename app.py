@@ -128,7 +128,8 @@ def browseUrl(videoId=None):
         return redirect(url_for('browseUrl', videoId=videoUrlForm.VIDEO_ID))
 
     if videoId:
-        videoInfo = api.getVideoInfo(videoId)
+        videoInfo = api.getVideoPreviewInfoFromId(videoId,
+                                                  inForceDBUse=current_user.is_anonymous)
 
         #todo!!!
         if not videoInfo:
@@ -149,20 +150,27 @@ def exercise(videoId=None,
     '''
     submitExerciseForm = SubmitExerciseForm()
 
+    #todo!
     if submitExerciseForm.validate_on_submit():
         return
 
-    # Look up video in DB, if not, fetch from LanGo youtube api.
-    videoInfo = api.getVideoInfo(videoId)
-
-    #todo!!!
-    if not videoInfo:
-        return 'Not valid url'
-
     if languageCode is None:
-        return render_template('exercisePreview.html',
-                               videoInfo=videoInfo)
 
+        videoInfo = api.getVideoPreviewInfoFromId(videoId,
+                                                  inForceDBUse=current_user.is_anonymous)
+
+        # todo!!!
+        if not videoInfo:
+            return 'Not valid url'
+
+        return render_template('exercisePreview.html',
+                               videoInfo=videoInfo,
+                               inExercise=True)
+
+    videoInfo = api.getVideoInfo(videoId,
+                                 inForceDBUse=current_user.is_anonymous)
+
+    #todo not need to do a sub dict!!!
     subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
 
     return render_template('exercise.html',

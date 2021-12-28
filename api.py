@@ -1,4 +1,6 @@
-from  sqlalchemy.sql.expression import func
+import logging
+
+from sqlalchemy.sql.expression import func
 
 from flask import url_for
 
@@ -11,9 +13,39 @@ import models
 
 from app import db
 
-def getVideoPreviewInfo( inVideo                 ,
-                         inLanguageCodes  = None ,
-                         inLimitLanguages = None ):
+def getVideoPreviewInfoFromId( inVideoId               ,
+                               inForceDBUse     = True ,
+                               **inKwargs              ):
+    '''
+    '''
+    videoDB = models.Video.query.get(inVideoId)
+
+    if not videoDB:
+
+        if inForceDBUse:
+            return
+
+        videoInfo = youtube.getVideoInfo(inVideoId)
+
+        if not videoInfo:
+            return
+
+        videoInfo[youtube.VIDEO_URL_KEY_NAME] = url_for('exercise', videoId=inVideoId)
+
+        for langCode in videoInfo[youtube.SUBTITLES_KEY_NAME].keys():
+            videoInfo[youtube.SUBTITLES_KEY_NAME][langCode][
+                youtube.EXERCISE_URL_KEY_NAME] = url_for('exercise', videoId=inVideoId, languageCode=langCode)
+
+        return videoInfo
+
+    return getVideoPreviewInfoFromDB(videoDB, **inKwargs)
+
+
+def getVideoPreviewInfoFromDB( inVideo                 ,
+                               inLanguageCodes  = None ,
+                               inLimitLanguages = None ):
+    '''
+    '''
     videoId = inVideo.id
 
     videoDict = {youtube.ID_KEY_NAME: videoId,
@@ -67,9 +99,9 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
             if videoDB in videos:
                 continue
 
-            videos.append( getVideoPreviewInfo( videoDB                               ,
-                                                inLanguageCodes  = languageShortCodes ,
-                                                inLimitLanguages = inLimitLanguages   ) )
+            videos.append( getVideoPreviewInfoFromDB( videoDB                               ,
+                                                      inLanguageCodes  = languageShortCodes ,
+                                                      inLimitLanguages = inLimitLanguages   ) )
 
     else:
         '''
@@ -83,21 +115,41 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
             from sqlalchemy.sql.expression import func
             Item.query.order_by(func.random()).offset(20).limit(10).all()
         '''
-        for video in models.Video.query.order_by(func.random()).limit(2).all():
+        for video in models.Video.query.order_by(func.random()).limit(inLimitVideos).all():
             videos.append(
-                getVideoPreviewInfo( video                             ,
-                                     inLanguageCodes=inByLanguages     ,
-                                     inLimitLanguages=inLimitLanguages ) )
+                getVideoPreviewInfoFromDB( video                             ,
+                                           inLanguageCodes=inByLanguages     ,
+                                           inLimitLanguages=inLimitLanguages ) )
 
     return videos
 
 
 def getVideoInfo(inYoutubeId,
-                 inLanguageCodes=None):
-    '''Checks if passed youtube Id is valid. Returns a video's information.
+                 inLanguageCodes=None,
+                 inForceLongCode=True,
+                 inForceDBUse=True):
+    '''Returns the video's information with the subtitle tracks.
+
+    Checks if passed youtube Id is valid.
+
+    Used for exercise routes.
 
     Args:
         inYoutubeId (str): video Id.
+        inLanguageCodes (list(str)): Language codes list to retrieve subtitle tracks.
+        inForceLongName (bool): Force Long code of subtitles. Ex: en-GB.
+        inForceDBUse (bool): todo!
+
+    Ex: getVideoInfo('Xou0au6OSZU', ['en-GB'])
+
+    Returns:
+        {'title': 'Videogame Discourse is Broken | Design Dive',
+         'author_name': 'AI and Games',
+         'author_url': 'https://www.youtube.com/c/AIGamesSeries',
+         'thumbnail_url': 'https://i.ytimg.com/vi/Xou0au6OSZU/hqdefault.jpg',
+         'subtitlesDict':
+            {'en-GB': {'transcriptText': [{'text': [['Video games discourse', False], ['is', True], ['broken.', False]], 'start': 0.08, 'duration': 2.24, 'end': 2.32},
+             ...
     '''
     # Check for basic info to make sure it can be embedded.
     videoInfoDict = youtube.getVideoBasicInfo(inYoutubeId)
@@ -109,10 +161,20 @@ def getVideoInfo(inYoutubeId,
     videoDB = models.Video.query.get(inYoutubeId)
 
     if videoDB:
+
+        if not inForceLongCode:
+            inLanguageCodes = [lang.split('-')[0] for lang in inLanguageCodes]
+
         for subtitleDB in videoDB.subtitles.all():
 
-            if inLanguageCodes and subtitleDB.languageCode not in inLanguageCodes:
-                continue
+            if inLanguageCodes:
+                if inForceLongCode:
+                    languageCode = subtitleDB.languageCode
+                else:
+                    languageCode = subtitleDB.languageCode.split('-')[0]
+
+                if languageCode not in inLanguageCodes:
+                    continue
 
             subDict = {youtube.TRANSCRIPT_TEXT_KEY_NAME       : json.loads(subtitleDB.text)}
 
@@ -127,12 +189,15 @@ def getVideoInfo(inYoutubeId,
         return youtube.getVideoInfo(inYoutubeId)
 
 def storeVideoInfo(inYoutubeId):
-    '''
+    '''Store a video and all its subtitle tracks into the DB.
+
+    If the youtubeId already exists in the DB as the id on the Video table. it will skip.
     '''
 
     videoDB = models.Video.query.get(inYoutubeId)
 
     if videoDB:
+        logging.error('Skipped youtube id {0}. Already exists on the DB.'.format(inYoutubeId))
         return
 
     videoInfo = youtube.getVideoInfo(inYoutubeId)
@@ -148,13 +213,14 @@ def storeVideoInfo(inYoutubeId):
     for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
         subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-        #todo!! Improve structure!
         youtube.formatTranscript(subList)
 
         languageDB = models.Language.query.get(languageCode.split('-')[0])
 
         if not languageDB:
-            print('SKIPPING!!! {0} - {1}'.format(languageCode.split('-')[0], inYoutubeId))
+            logging.info('Skipping language: {0} in video: {1}. Not supported'.format(
+                languageCode.split('-')[0],
+                inYoutubeId))
             continue
 
         subTrackDB = models.Subtitle(

@@ -2,8 +2,6 @@
 
 {% block content %}
 
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-
     <p>Enter a youtube url.</p>
 
     <form id="form" method="POST" action="{{ url_for('browseUrl') }}">
@@ -18,6 +16,9 @@
 {% if videoInfo %}
     {% include "_detailedVideo.html" %}
 {% endif %}
+
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script type="text/javascript" src="{{ url_for('static', filename="js/voting.js") }}"></script>
 
 <script>
     const urlField = document.getElementById('url');

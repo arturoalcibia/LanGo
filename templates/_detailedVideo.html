@@ -1,6 +1,15 @@
-<h2><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h2>
+{% if inExercise %}
+    <h2>{{ videoInfo['title'] }}</h2>
+{% else %}
+    <h2><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h2>
+{% endif %}
 
-<a href="{{ videoInfo['videoUrl'] }}"><img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}"></a>
+{% if inExercise %}
+    <img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}">
+{% else %}
+    <a href="{{ videoInfo['videoUrl'] }}"><img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}"></a>
+{% endif %}
+
 <p>Available in the following languages:</p>
 {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
     <p>

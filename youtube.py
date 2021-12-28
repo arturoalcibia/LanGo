@@ -50,6 +50,8 @@ def formatTranscript(inTranscriptList):
                 'start': float,
                 'end': float,
                 'duration': float}].
+
+    #todo!! Improve structure!
     '''
     for subDict in inTranscriptList:
 
@@ -64,6 +66,8 @@ def getVideoBasicInfo(inVideoId):
     Args:
         inVideoId (str): video Id.
 
+    #todo! prune! This returns unneccessary info!!!
+
     Returns:
         dict: Youtube response.
             Ex:
@@ -71,7 +75,7 @@ def getVideoBasicInfo(inVideoId):
                 "author_name":"Cojo Feliz",
                 "author_url":"https://www.youtube.com/user/cojofeliz",
                 "thumbnail_url":"https://i.ytimg.com/vi/yJhBISGvt08/hqdefault.jpg",
-                ...} #todo! prune!
+                ...}
     '''
     requestUrl = 'https://www.youtube.com/oembed?format=json&url=https://www.youtube.com/watch?v={0}'.format(
         inVideoId)
