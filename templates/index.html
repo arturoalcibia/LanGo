@@ -2,12 +2,31 @@
 
 {% block content %}
 
-    {% for videoInfo in videos %}
-        {% include "_detailedVideo.html" %}
-    {% endfor %}
+    <main>
+        <!--=============== HOME ===============-->
+        <section class="container section section__height" id="home">
+            <h2 class="section__title">Home</h2>
+        </section>
 
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename="js/voting.js") }}"></script>
-    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/general.css') }}">
+        <!--=============== ABOUT ===============-->
+        <section class="container section section__height" id="about">
+            <h2 class="section__title">About</h2>
+        </section>
+
+        <!--=============== SKILLS ===============-->
+        <section class="container section section__height" id="skills">
+            <h2 class="section__title">Skills</h2>
+        </section>
+
+        <!--=============== PORTFOLIO ===============-->
+        <section class="container section section__height" id="portfolio">
+            <h2 class="section__title">Portfolio</h2>
+        </section>
+
+        <!--=============== CONTACTME ===============-->
+        <section class="container section section__height" id="contactme">
+            <h2 class="section__title">Contactme</h2>
+        </section>
+    </main>
 
 {% endblock %}

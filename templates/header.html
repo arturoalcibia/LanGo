@@ -3,41 +3,64 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <!--=============== BOXICONS ===============-->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+        <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/styles.css') }}">
+
+        <title>LanGo</title>
     </head>
 
     <body>
-        <header>
-            <nav>
-                <div>
-                    <ul>
-                        <li>
-                            <a href="{{ url_for('index') }}">
-                                <span>LanGo</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('browseUrl') }}">
-                                <span>Browse by url</span>
-                            </a>
-                        </li>
-                        <li>
+
+        <header class="header" id="header">
+            <div class="nav__menu" id="nav-menu">
+                <ul class="nav__list">
+                    <li class="nav__item">
+                        <a href="{{ url_for('index') }}" class="nav__link active-link">
+                            <i class='bx bx-home-alt nav__icon'></i>
+                            <span class="nav__name">LanGo</span>
+                        </a>
+                    </li>
+
+                    <li class="nav__item">
+                        <a href="{{ url_for('profile') }}" class="nav__link">
+                            <i class='bx bx-user nav__icon'></i>
                             {% if current_user.is_anonymous %}
-                            <a href="{{ url_for('profile') }}">Profile</a>
+                                <span class="nav__name">Log in</span>
                             {% else %}
-                            <a href="{{ url_for('profile') }}">{{ current_user.username }}</a>
+                                <span class="nav__name">{{ current_user.username }}</span>
                             {% endif %}
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url_for('contact') }}">
-                                <span>Contact Us</span>
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-            </nav>
+                        </a>
+                    </li>
+
+                    <li class="nav__item">
+                        <a href="#skills" class="nav__link">
+                            <i class='bx bx-book-alt nav__icon'></i>
+                            <span class="nav__name">Skills</span>
+                        </a>
+                    </li>
+
+                    <li class="nav__item">
+                        <a href="#portfolio" class="nav__link">
+                            <i class='bx bx-briefcase-alt nav__icon'></i>
+                            <span class="nav__name">Portfolio</span>
+                        </a>
+                    </li>
+
+                    <li class="nav__item">
+                        <a href="#contactme" class="nav__link">
+                            <i class='bx bx-message-square-detail nav__icon'></i>
+                            <span class="nav__name">Contactme</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <img src="" alt="" class="nav__img">
         </header>
 
         {% block content %}{% endblock %}
 
     </body>
+    </html>
