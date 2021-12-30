@@ -1,21 +1,28 @@
-<article class="card">
-    <div class="card__img">
-        <img src="https://i.ytimg.com/an_webp/jTeBoeHbbpM/mqdefault_6s.webp?du=3000&sqp=CIGHro4G&rs=AOn4CLB5RQ7xWus0l59NWR-jDdjwl0U3QA" alt="">
-    </div>
-    <div class="card__name">
-        {% if inExercise %}
-            <p>{{ videoInfo['title'] }}</p>
-        {% else %}
-            <p><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></p>
-        {% endif %}
-    </div>
-    <div class="card__precis">
-        <a href="" class="card__icon" ><ion-icon name="heart-outline"></ion-icon></a>
-
-        <div>
-            <span class="card__preci card__preci--before">$990.00</span>
-            <span class="card__preci card__preci--now">$749.00</span>
+<div class="container">
+      <div class='banner-img'>
+          <img src="https://images.unsplash.com/photo-1582727657635-c771002bdada?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ">
+      </div>
+      <img src='' class="profile-img">
+      <h1 class="name">Anna Marie</h1>
+      <!--
+      <p class="description">Hi there! My name is Anna and I am a book lover, traveler and professional blogger. Follow me to stay connected!</p>
+      -->
+      <div class="wrapper-flex">
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
         </div>
-        <a href="" class="card__icon"><ion-icon name="cart-outline"></ion-icon></a>
-    </div>
-</article>
+        <div class="last-bid">0.244wETH</div>
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+      </div>
+     <div class="wrapper-flex">
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+        <div class="last-bid">0.244wETH</div>
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+      </div>
+</div>
