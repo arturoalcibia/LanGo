@@ -1,32 +1,57 @@
 {% extends "header.html" %}
 
 {% block content %}
+    <!--
+    -->
+  <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/index.css') }}">
 
-    <main>
-        <!--=============== HOME ===============-->
-        <section class="container section section__height" id="home">
-            <h2 class="section__title">Home</h2>
-        </section>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+  <div class="wrapper-grid">
 
-        <!--=============== ABOUT ===============-->
-        <section class="container section section__height" id="about">
-            <h2 class="section__title">About</h2>
-        </section>
+    <div class="container">
+      <div class='banner-img'></div>
+      <img src='' class="profile-img">
+      <h1 class="name">Anna Marie</h1>
+      <p class="description">Hi there! My name is Anna and I am a book lover, traveler and professional blogger. Follow me to stay connected!</p>
+      <div class="wrapper-flex">
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+        <div class="last-bid">0.244wETH</div>
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+      </div>
+     <div class="wrapper-flex">
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+        <div class="last-bid">0.244wETH</div>
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+      </div>
+    </div>
 
-        <!--=============== SKILLS ===============-->
-        <section class="container section section__height" id="skills">
-            <h2 class="section__title">Skills</h2>
-        </section>
 
-        <!--=============== PORTFOLIO ===============-->
-        <section class="container section section__height" id="portfolio">
-            <h2 class="section__title">Portfolio</h2>
-        </section>
+    <div class="container">
+      <div class='banner-img'></div>
+      <img src='' class="profile-img">
+      <h1 class="name">Anna Marie</h1>
+      <p class="description">Hi there! My name is Anna and I am a book lover, traveler and professional blogger. Follow me to stay connected!</p>
+      <div class="wrapper-flex">
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+        <div class="last-bid">0.244wETH</div>
+        <div class="react">
+          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
+        </div>
+      </div>
+    </div>
 
-        <!--=============== CONTACTME ===============-->
-        <section class="container section section__height" id="contactme">
-            <h2 class="section__title">Contactme</h2>
-        </section>
-    </main>
+
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
 
 {% endblock %}

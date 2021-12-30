@@ -82,7 +82,7 @@ img {
 }
 
 /*=============== LAYOUT ===============*/
-.container {
+.headerContainer {
   max-width: 968px;
   margin-left: 1rem;
   margin-right: 1rem;
@@ -135,7 +135,7 @@ img {
   }
 }
 
-.nav__list, 
+.nav__list,
 .nav__link {
   display: flex;
 }
@@ -244,7 +244,7 @@ img {
 
 /* For large devices */
 @media screen and (min-width: 1024px) {
-  .container {
+  .headerContainer {
     margin-left: auto;
     margin-right: auto;
   }

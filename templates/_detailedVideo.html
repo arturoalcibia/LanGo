@@ -1,21 +1,21 @@
-{% if inExercise %}
-    <h2>{{ videoInfo['title'] }}</h2>
-{% else %}
-    <h2><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h2>
-{% endif %}
+<article class="card">
+    <div class="card__img">
+        <img src="https://i.ytimg.com/an_webp/jTeBoeHbbpM/mqdefault_6s.webp?du=3000&sqp=CIGHro4G&rs=AOn4CLB5RQ7xWus0l59NWR-jDdjwl0U3QA" alt="">
+    </div>
+    <div class="card__name">
+        {% if inExercise %}
+            <p>{{ videoInfo['title'] }}</p>
+        {% else %}
+            <p><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></p>
+        {% endif %}
+    </div>
+    <div class="card__precis">
+        <a href="" class="card__icon" ><ion-icon name="heart-outline"></ion-icon></a>
 
-{% if inExercise %}
-    <img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}">
-{% else %}
-    <a href="{{ videoInfo['videoUrl'] }}"><img width="256px" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}"></a>
-{% endif %}
-
-<p>Available in the following languages:</p>
-{% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
-    <p>
-        <a href="{{ subtitleDict['exerciseUrl'] }}">{{ subtitleDict['longLanguage'] }}</a>
-        <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i> Downvote </i></button>
-        <span id="vote_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}">0</span>
-        <button onclick="vote({{ subtitleDict['id'] }}, 'upvote')" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == True }} ><i> Upvote </i></button>
-    </p>
-{% endfor %}
+        <div>
+            <span class="card__preci card__preci--before">$990.00</span>
+            <span class="card__preci card__preci--now">$749.00</span>
+        </div>
+        <a href="" class="card__icon"><ion-icon name="cart-outline"></ion-icon></a>
+    </div>
+</article>
