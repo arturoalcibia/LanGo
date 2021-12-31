@@ -4,6 +4,12 @@
   --clr-gray-light: #b0bec5;
 }
 
+.thumbnail {
+  width: 300px;
+  height: 160px;
+  object-fit: cover;
+}
+
 .wrapper-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, 20rem);
@@ -23,19 +29,9 @@
   z-index: 1;
 }
 
-.banner-img {
-  position: relative;
-  object-fit: none;
-  height: 12rem;
-  width: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-
 .name {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1rem;
 }
 
 .description {
@@ -58,11 +54,6 @@
   padding: 5px;
   border-radius: 5px;
   transition: all 0.25s ease;
-}
-
-.react:hover {
-  background: #651fff;
-  color: #651fff;
 }
 
 .react ion-icon {
@@ -94,11 +85,6 @@
   padding: 5px;
   border-radius: 5px;
   transition: all 0.25s ease;
-}
-
-.wrapper-flex .react:hover {
-  background: hsl(202, 100%, 16%);
-  color: hsl(0, 0%, 100%);
 }
 
 .wrapper-flex .react ion-icon {

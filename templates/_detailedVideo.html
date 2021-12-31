@@ -1,28 +1,38 @@
 <div class="container">
-      <div class='banner-img'>
-          <img src="https://images.unsplash.com/photo-1582727657635-c771002bdada?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=400&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ">
+
+      <div>
+          {% if inExercise %}
+            <img class="thumbnail" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}">
+          {% else %}
+            <a href="{{ videoInfo['videoUrl'] }}"><img class="thumbnail" src="{{ 'https://i.ytimg.com/vi/%s/hqdefault.jpg' %  videoInfo['id'] }}"></a>
+          {% endif %}
       </div>
-      <img src='' class="profile-img">
-      <h1 class="name">Anna Marie</h1>
+
+      {% if inExercise %}
+        <h1 class="name">{{ videoInfo['title'] }}</h1>
+      {% else %}
+        <h1 class="name"><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h1>
+      {% endif %}
+
       <!--
       <p class="description">Hi there! My name is Anna and I am a book lover, traveler and professional blogger. Follow me to stay connected!</p>
       -->
-      <div class="wrapper-flex">
-        <div class="react">
-          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
-        </div>
-        <div class="last-bid">0.244wETH</div>
-        <div class="react">
-          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
-        </div>
-      </div>
-     <div class="wrapper-flex">
-        <div class="react">
-          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
-        </div>
-        <div class="last-bid">0.244wETH</div>
-        <div class="react">
-          <ion-icon name="heart-outline"></ion-icon> <span>322</span>
-        </div>
-      </div>
+
+      {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
+            <div class="wrapper-flex">
+
+                <div class="last-bid"><a href="{{ subtitleDict['exerciseUrl'] }}" >{{ subtitleDict['longLanguage'] }}</a></div>
+
+                <div class="react">
+                    <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i class="fa fa-heart-broken"></i></button>
+                    <span id="vote_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}">0</span>
+                    <button onclick="vote({{ subtitleDict['id'] }}, 'upvote')" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == True }} ><i class="fas fa-heart"></i></button>
+                </div>
+
+            </div>
+
+      {% endfor %}
+
+
+
 </div>
