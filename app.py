@@ -145,7 +145,7 @@ def browseUrl(videoId=None):
 @app.route('/exercise/')
 @app.route('/exercise/<videoId>')
 @app.route('/exercise/<videoId>/<languageCode>')
-@app.route('/exercise/<videoId>/<languageCode>/<any(fill_all, fill_known):exerciseType>')
+@app.route('/exercise/<videoId>/<languageCode>/<exerciseType>')
 def exercise(videoId=None,
              languageCode=None,
              exerciseType=None):
@@ -173,6 +173,9 @@ def exercise(videoId=None,
         return render_template('exercisePreview.html',
                                videoInfo=videoInfo,
                                inMode='chooseExerciseType')
+
+    if exerciseType not in youtube.EXERCISE_TYPES:
+        return '', 404
 
     videoInfo = api.getVideoInfo(videoId,
                                  exerciseType,

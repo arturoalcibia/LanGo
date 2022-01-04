@@ -27,14 +27,29 @@
 
 {% set inputIdCount = namespace(value=0) %}
 {% for subDict in subList %}
-    <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ subDict["end"] }}">
+    <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ (subDict["duration"] + subDict["start"])|round(2) }}">
         <span class="subId">"{{ loop.index }}"</span>
-        {% for textTuple in subDict["text"] %}
-            {% if textTuple[1] %}
-                <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
-                {% set inputIdCount.value = inputIdCount.value + 1 %}
+        {% if exerciseType == 'exerciseFillKnownUrl' %}
+            {% set wordsToIterate = subDict["text"] %}
+        {% elif exerciseType == 'exerciseFillAllUrl' %}
+            {% set wordsToIterate = subDict["text"].split(' ') %}
+        {% endif %}
+        {% for textTuple in wordsToIterate %}
+            {% if exerciseType == 'exerciseFillKnownUrl' %}
+                {% if textTuple[1] %}
+                    <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
+                    {% set inputIdCount.value = inputIdCount.value + 1 %}
+                {% else %}
+                    <span class="textSub">{{ textTuple[0] }}</span>
+                {% endif %}
             {% else %}
-                <span class="textSub">{{ textTuple[0] }}</span>
+                {% if loop.first or loop.last %}
+                    <span class="textSub">{{ textTuple }}</span>
+                {% else %}
+                    <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple }}" autocomplete="off"/>
+                    {% set inputIdCount.value = inputIdCount.value + 1 %}
+
+                {% endif %}
             {% endif %}
         {% endfor %}
         <br>

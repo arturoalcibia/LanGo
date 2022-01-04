@@ -71,7 +71,9 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
             'voted':
                 True,
             youtube.EXERCISE_FILL_ALL_URL_KEY_NAME:
-                url_for('exercise', videoId=videoId, languageCode=langCode),
+                url_for('exercise', videoId=videoId, languageCode=langCode, exerciseType=youtube.EXERCISE_FILL_ALL_URL_KEY_NAME),
+            youtube.EXERCISE_FILL_KNOWN_URL_KEY_NAME:
+                url_for('exercise', videoId=videoId, languageCode=langCode, exerciseType=youtube.EXERCISE_FILL_KNOWN_URL_KEY_NAME),
             'id':
                 subtitle.id,
             youtube.LONG_LANGUAGE_KEY_NAME:
