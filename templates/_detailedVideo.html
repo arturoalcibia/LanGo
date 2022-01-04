@@ -8,7 +8,7 @@
           {% endif %}
       </div>
 
-      {% if inExercise %}
+      {% if inMode == 'chooseLanguage' or inMode == 'chooseExerciseType' %}
         <h1 class="name">{{ videoInfo['title'] }}</h1>
       {% else %}
         <h1 class="name"><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h1>
@@ -21,7 +21,11 @@
       {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
             <div class="wrapper-flex">
 
-                <div class="last-bid"><a href="{{ subtitleDict['exerciseUrl'] }}" >{{ subtitleDict['longLanguage'] }}</a></div>
+                {% if inMode == 'chooseExerciseType' %}
+                    <div class="last-bid"><p>{{ subtitleDict['longLanguage'] }}</p></div>
+                {% else %}
+                    <div class="last-bid"><a href="{{ subtitleDict['exerciseUrl'] }}" >{{ subtitleDict['longLanguage'] }}</a></div>
+                {% endif %}
 
                 <div class="react">
                     <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i class="fa fa-heart-broken"></i></button>
@@ -30,6 +34,11 @@
                 </div>
 
             </div>
+                {% if inMode == 'chooseExerciseType' %}
+                <div class="subtitle-modes">
+                    <a href="{{ subtitleDict['exerciseUrl'] }}" >Fill All words</a>
+                <div>
+                {% endif %}
 
       {% endfor %}
 

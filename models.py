@@ -42,6 +42,7 @@ class Subtitle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     languageCode = db.Column(db.String(4), index=True)
     text = db.Column(db.Text())
+    knownWordsIndexList = db.Column(db.Text(), nullable=True)
     isDefault = db.Column(db.Boolean())
     videoId    = db.Column(db.String, db.ForeignKey('video.id'))
     language_id = db.Column(db.String, db.ForeignKey('language.shortCode'))

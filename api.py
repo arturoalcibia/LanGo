@@ -66,9 +66,11 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
         langCode = subtitle.languageCode
 
         videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
+            'hasKnownWordsIndexList':
+                bool(subtitle.knownWordsIndexList),
             'voted':
                 True,
-            youtube.EXERCISE_URL_KEY_NAME:
+            youtube.EXERCISE_FILL_ALL_URL_KEY_NAME:
                 url_for('exercise', videoId=videoId, languageCode=langCode),
             'id':
                 subtitle.id,
@@ -125,6 +127,7 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
 
 
 def getVideoInfo(inYoutubeId,
+                 inExerciseType,
                  inLanguageCodes=None,
                  inForceLongCode=True,
                  inForceDBUse=True):
@@ -188,7 +191,7 @@ def getVideoInfo(inYoutubeId,
     else:
         return youtube.getVideoInfo(inYoutubeId)
 
-def storeVideoInfo(inYoutubeId):
+def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
     '''Store a video and all its subtitle tracks into the DB.
 
     If the youtubeId already exists in the DB as the id on the Video table. it will skip.
@@ -213,7 +216,6 @@ def storeVideoInfo(inYoutubeId):
     for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
         subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-        youtube.formatTranscript(subList)
 
         languageDB = models.Language.query.get(languageCode.split('-')[0])
 
@@ -223,11 +225,18 @@ def storeVideoInfo(inYoutubeId):
                 inYoutubeId))
             continue
 
+        inSubtitleKwargs = {}
+
+        if inLookUpDictionary:
+            pass
+            #todo!
+
         subTrackDB = models.Subtitle(
             languageCode=languageCode,
             text=json.dumps(subList),
             videoIdLink=videoDB,
-            languageLink=languageDB)
+            languageLink=languageDB,
+            **inSubtitleKwargs)
 
         db.session.add(subTrackDB)
 

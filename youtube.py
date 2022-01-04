@@ -22,6 +22,8 @@ SUBTITLES_KEY_NAME = 'subtitlesDict'
 #todo!
 EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 
+EXERCISE_FILL_ALL_URL_KEY_NAME = 'exerciseUrl'
+
 VIDEO_URL_KEY_NAME = 'videoUrl'
 
 LONG_LANGUAGE_KEY_NAME = 'longLanguage'
@@ -31,33 +33,6 @@ TRANSCRIPT_OBJ_KEY_NAME = 'transcriptObj'
 
 # Transcript text name. Stored in the DB as text.
 TRANSCRIPT_TEXT_KEY_NAME = 'transcriptText'
-
-
-def formatTranscript(inTranscriptList):
-    ''' Format transcript by:
-            - Adding end float key per text.
-            - Replacing the text str to a list with each word.
-
-    * Currently coming from YouTubeTranscriptApi.Transcript.fetch Fn.
-
-    Args:
-        inTranscriptList (list):
-            Ex:
-                [{'text': str, 'start': float, 'duration': float}].
-
-    New format:
-        List: [{'text': list[str],
-                'start': float,
-                'end': float,
-                'duration': float}].
-
-    #todo!! Improve structure!
-    '''
-    for subDict in inTranscriptList:
-
-        subDict['text'] = language.splitSentence(subDict['text'])
-        startFloat = float(subDict['start'])
-        subDict['end'] = round(float(subDict['duration']) + startFloat, 2)
 
 @functools.lru_cache(maxsize=None)
 def getVideoBasicInfo(inVideoId):

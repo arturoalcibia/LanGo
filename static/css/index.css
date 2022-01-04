@@ -4,6 +4,12 @@
   --clr-gray-light: #b0bec5;
 }
 
+.instructions-one-card{
+  text-align: center;
+  font-size: 1.5rem;
+  padding-top: 4rem;
+}
+
 .thumbnail {
   width: 300px;
   height: 160px;
@@ -16,6 +22,14 @@
   justify-content: left;
   clear: both;
   padding: 5rem;
+}
+
+.wrapper-one-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 20rem);
+  justify-content: center;
+  clear: both;
+  padding: 1rem;
 }
 
 .container {
@@ -69,6 +83,15 @@
   justify-content: space-between;
   align-items:     center;
 }
+
+.subtitle-modes {
+  display:         table;
+  align-items:     center;
+  padding-left: 1rem;
+  font-size: 12px;
+  font-weight: 600;
+}
+
 
 .wrapper-flex.mb { margin-bottom: 15px; }
 

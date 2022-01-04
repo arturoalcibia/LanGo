@@ -106,6 +106,7 @@ def browse(query=None,
                                languages=languagesNames,
                                searchVideoForm=searchVideoForm)
 
+    #todo! change to api!
     if languageCode is not None:
         searchResults = youtube.search(query, inLanguageCode=languageCode)
     else:
@@ -141,18 +142,15 @@ def browseUrl(videoId=None):
 
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
-@app.route('/exercise', methods=("POST",))
+@app.route('/exercise/')
 @app.route('/exercise/<videoId>')
 @app.route('/exercise/<videoId>/<languageCode>')
+@app.route('/exercise/<videoId>/<languageCode>/<any(fill_all, fill_known):exerciseType>')
 def exercise(videoId=None,
-             languageCode=None):
+             languageCode=None,
+             exerciseType=None):
     '''
     '''
-    submitExerciseForm = SubmitExerciseForm()
-
-    #todo!
-    if submitExerciseForm.validate_on_submit():
-        return
 
     if languageCode is None:
 
@@ -165,19 +163,29 @@ def exercise(videoId=None,
 
         return render_template('exercisePreview.html',
                                videoInfo=videoInfo,
-                               inExercise=True)
+                               inMode='chooseLanguage')
+
+    if exerciseType is None:
+
+        videoInfo = api.getVideoPreviewInfoFromId(videoId,
+                                                  inForceDBUse=current_user.is_anonymous)
+
+        return render_template('exercisePreview.html',
+                               videoInfo=videoInfo,
+                               inMode='chooseExerciseType')
 
     videoInfo = api.getVideoInfo(videoId,
+                                 exerciseType,
+                                 inLanguageCodes=[languageCode],
                                  inForceDBUse=current_user.is_anonymous)
 
-    #todo not need to do a sub dict!!!
-    subDict = videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)
-
-    return render_template('exercise.html',
-                           videoId=videoId,
-                           languageCode=languageCode,
-                           subList=subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME],
-                           submitExerciseForm=submitExerciseForm)
+    return render_template(
+        'exercise.html',
+        videoId=videoId,
+        languageCode=languageCode,
+        subList=videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)[youtube.TRANSCRIPT_TEXT_KEY_NAME],
+        videoInfo=videoInfo,
+        exerciseType=exerciseType)
 
 def __populateVideoInfoUrls(inVideoInfo):
     '''

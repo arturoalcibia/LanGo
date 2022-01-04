@@ -1,4 +1,12 @@
 {% extends "header.html" %}
 {% block content %}
-    {% include "_detailedVideo.html" %}
+    {% if inMode == 'chooseLanguage' %}
+        <p class="instructions-one-card">Choose a subtitle language</p>
+    {% elif inMode == 'chooseExerciseType' %}
+        <p class="instructions-one-card">Choose an exercise type.</p>
+    {% endif %}
+    {% include "_detailedVideoDependencies.html" %}
+    <div class="wrapper-one-card">
+        {% include "_detailedVideo.html" %}
+    </div>
 {% endblock %}
