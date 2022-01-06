@@ -53,6 +53,7 @@ function onStateChange(event) {
                 divsToHide[i].classList.remove('hidden');
             }
             InitialInstructionDiv.classList.add('hidden');
+            hideVideo()
             firstTimePlaying = false;
         }
 

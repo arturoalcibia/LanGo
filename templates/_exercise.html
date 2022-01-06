@@ -2,78 +2,85 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/video.css') }}">
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
 
-<div id="scoreDiv">
-    <span>Score: </span><span id="scoreInt"></span><span id="scoreTotal"></span>
-</div>
-
-<div id="hideBtnDiv">
-    <input type="button" value="Hide Video" id="hideVideoBtn"/>
-</div>
-
-<div id="InitialInstructionDiv">
-    <span id="initialInstructionSpan">Click play video to start!</span>
-</div>
-
-<div id="ytplayer"></div>
-
-<div id="buttonsDiv">
-    <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
-    <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
-    <input type="button" value="Pause" id="playPauseBtn"/>
-    <input type="button" value="Previous unanswered subtitle" id="previousUnansweredSubtitleBtn"/>
-    <input type="button" value="Next unanswered subtitle" id="nextUnansweredSubtitleBtn"/>
-    <input type="button" value="Answer questions" id="answer"/>
-</div>
-
-{% set inputIdCount = namespace(value=0) %}
-{% for subDict in subList %}
-    <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ (subDict["duration"] + subDict["start"])|round(2) }}">
-        <span class="subId">"{{ loop.index }}"</span>
-        {% if exerciseType == 'exerciseFillKnownUrl' %}
-            {% set wordsToIterate = subDict["text"] %}
-        {% elif exerciseType == 'exerciseFillAllUrl' %}
-            {% set wordsToIterate = subDict["text"].split(' ') %}
-        {% endif %}
-        {% for textTuple in wordsToIterate %}
-            {% if exerciseType == 'exerciseFillKnownUrl' %}
-                {% if textTuple[1] %}
-                    <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off"/>
-                    {% set inputIdCount.value = inputIdCount.value + 1 %}
-                {% else %}
-                    <span class="textSub">{{ textTuple[0] }}</span>
-                {% endif %}
-            {% else %}
-                {% if loop.first or loop.last %}
-                    <span class="textSub">{{ textTuple }}</span>
-                {% else %}
-                    <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple }}" autocomplete="off"/>
-                    {% set inputIdCount.value = inputIdCount.value + 1 %}
-
-                {% endif %}
-            {% endif %}
-        {% endfor %}
-        <br>
+<div class="exercise">
+    <div id="scoreDiv">
+        <span>Score: </span><span id="scoreInt"></span><span id="scoreTotal"></span>
     </div>
-{% endfor %}
 
-<div id="settingsDiv">
-    <p>Settings</p>
-    <ul>
+    <div id="hideBtnDiv">
+        <input type="button" value="Hide Video" id="hideVideoBtn"/>
+    </div>
 
-        <li> Speed:
-            <input type="radio" id="pointFiveRadio"  name="speedRadio" value="0.5"> 0.50
-            <input type="radio" id="pointSevenRadio" name="speedRadio" value="0.75"> 0.75
-            <input type="radio" id="oneRadio"        name="speedRadio" value="1"> Normal
-        </li>
-        <li>Simple Answer mode (ä => a): <input type="checkbox" id="simpleAnswerModeCheckBox"></li>
-    </ul>
+    <div id="InitialInstructionDiv">
+        <span id="initialInstructionSpan">Click play video to start!</span>
+    </div>
+
+    <div id="ytplayer"></div>
+
+    <div id="buttonsDiv">
+        <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
+        <input type="button" value="Next subtitle" id="nextSubtitleBtn"/>
+        <input type="button" value="Pause" id="playPauseBtn"/>
+        <input type="button" value="Previous unanswered subtitle" id="previousUnansweredSubtitleBtn"/>
+        <input type="button" value="Next unanswered subtitle" id="nextUnansweredSubtitleBtn"/>
+        <input type="button" value="Answer questions" id="answer"/>
+    </div>
+
+    {% set inputIdCount = namespace(value=0) %}
+    {% for subDict in subList %}
+        <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ (subDict["duration"] + subDict["start"])|round(2) }}">
+            <span class="subId">"{{ loop.index }}"</span>
+            {% if exerciseType == 'exerciseFillKnownUrl' %}
+                {% set wordsToIterate = subDict["text"] %}
+            {% elif exerciseType == 'exerciseFillAllUrl' %}
+                {% set wordsToIterate = subDict["text"].split(' ') %}
+            {% endif %}
+            {% for textTuple in wordsToIterate %}
+                {% if exerciseType == 'exerciseFillKnownUrl' %}
+                    {% if textTuple[1] %}
+                        <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off" size="{{ textTuple[0] }}"/>
+                        {% set inputIdCount.value = inputIdCount.value + 1 %}
+                    {% else %}
+                        <span class="textSub">{{ textTuple[0] }}</span>
+                    {% endif %}
+                {% else %}
+                    {% if loop.first or loop.last %}
+                        <span class="textSub">{{ textTuple }}</span>
+                    {% else %}
+                        <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple }}" autocomplete="off" size="{{ textTuple|length }}" />
+                        {% set inputIdCount.value = inputIdCount.value + 1 %}
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            <br>
+        </div>
+    {% endfor %}
+
+    <div id="settingsDiv">
+        <p>Settings</p>
+        <ul>
+
+            <li> Speed:
+                <input type="radio" id="pointFiveRadio"  name="speedRadio" value="0.5"> 0.50
+                <input type="radio" id="pointSevenRadio" name="speedRadio" value="0.75"> 0.75
+                <input type="radio" id="oneRadio"        name="speedRadio" value="1"> Normal
+            </li>
+            <li>Simple Answer mode (ä => a): <input type="checkbox" id="simpleAnswerModeCheckBox"></li>
+        </ul>
+    </div>
 </div>
 
 <script type="text/javascript">
     var videoId = '{{ videoId }}';
 </script>
 
+<script type="text/javascript">
+    const subtitlesAmount = {{ 2 if exerciseType == 'exerciseFillKnownUrl' else 0 }}
+</script>
+
 <script type="text/javascript" src="{{ url_for('static', filename="js/subtitlesDisplay.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/playerEvents.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/youtubePlayer.js") }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename="js/inputValidation.js") }}"></script>
+
+<link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='css/exercise.css') }}">

@@ -1,8 +1,7 @@
 // Query all subs
 var subtitlesDiv = document.getElementsByClassName('sub');
 
-// Get settings
-const subtitlesAmount = 2
+
 
 // Amount in Miliseconds.
 const handleMiliSeconds = 500;
