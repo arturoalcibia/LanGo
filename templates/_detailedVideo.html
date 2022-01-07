@@ -14,10 +14,6 @@
         <h1 class="name"><a href="{{ videoInfo['videoUrl'] }}">{{ videoInfo['title'] }}</a></h1>
       {% endif %}
 
-      <!--
-      <p class="description">Hi there! My name is Anna and I am a book lover, traveler and professional blogger. Follow me to stay connected!</p>
-      -->
-
       {% for subtitleCode, subtitleDict in videoInfo['subtitlesDict'].items() if True %}
             <div class="wrapper-flex">
 
@@ -28,9 +24,33 @@
                 {% endif %}
 
                 <div class="react">
-                    <button onclick="vote( {{ subtitleDict['id'] }}, {{ subtitleDict['id'] }})" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == False }} ><i class="fa fa-heart-broken"></i></button>
-                    <span id="vote_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}">0</span>
-                    <button onclick="vote({{ subtitleDict['id'] }}, 'upvote')" {{ 'class="voted"'|safe if subtitleDict.get('voted', None) == True }} ><i class="fas fa-heart"></i></button>
+
+                    {% set userVote = subtitleDict.get('userVote', None) %}
+
+                    {% if userVote == True %}
+                        {% set upvoteClass = 'upvoted' %}
+                        {% set downvoteClass = '' %}
+                        {% set originalScore = subtitleDict['voteCount'] - 1 %}
+                    {% elif userVote == False %}
+                        {% set upvoteClass = '' %}
+                        {% set downvoteClass = 'downvoted' %}
+                        {% set originalScore = subtitleDict['voteCount'] + 1 %}
+                    {% else %}
+                        {% set upvoteClass = '' %}
+                        {% set downvoteClass = '' %}
+                        {% set originalScore = subtitleDict['voteCount'] %}
+                    {% endif %}
+
+                    <button id="downvoteButton_{{ subtitleDict['id'] }}" onclick="vote( {{ subtitleDict['id'] }}, 'downvote')" class="vote {{ downvoteClass }}" >
+                        <i class="fa fa-heart-broken"></i>
+                    </button>
+
+                    <span id="voteSpan_{{ subtitleDict['id'] }}" class="voteSpan" data-db="{{ subtitleDict['id'] }}" data-original-score="{{ originalScore }}">{{ subtitleDict['voteCount'] }}</span>
+
+                    <button id="upvoteButton_{{ subtitleDict['id'] }}" onclick="vote({{ subtitleDict['id'] }}, 'upvote')" class="vote {{ upvoteClass }}">
+                        <i class="fas fa-heart"></i>
+                    </button>
+
                 </div>
 
             </div>

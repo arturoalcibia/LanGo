@@ -68,7 +68,8 @@ def index():
     '''
 
     if current_user.is_authenticated:
-        videos = api.getVideoPreviewsInfo(current_user.languages.all())
+        videos = api.getVideoPreviewsInfo(current_user.languages.all(),
+                                          inUserDB = current_user)
     else:
         videos = api.getVideoPreviewsInfo( inLimitLanguages = 2 )
 
@@ -208,14 +209,17 @@ def vote(inSubtitleId,
 
     inSubIdDB = models.Subtitle.query.get_or_404(inSubtitleId)
     vote = models.Vote.query.filter_by(user=current_user, subtitle=inSubIdDB).first()
-    valueBool = True if inVoteValue == 'upvote' else False
 
     if vote:
+
+        valueBool = True if inVoteValue == 'upvote' else False
+
         if vote.upvote != valueBool:
             vote.upvote = valueBool
             db.session.commit()
         else:
-            return '', 403
+            db.session.delete(vote)
+            db.session.commit()
 
     else:
         vote = models.Vote(user=current_user, subtitle=inSubIdDB, upvote=bool(inVoteValue))

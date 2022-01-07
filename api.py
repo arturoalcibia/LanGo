@@ -43,7 +43,8 @@ def getVideoPreviewInfoFromId( inVideoId               ,
 
 def getVideoPreviewInfoFromDB( inVideo                 ,
                                inLanguageCodes  = None ,
-                               inLimitLanguages = None ):
+                               inLimitLanguages = None ,
+                               userDB           = None ):
     '''
     '''
     videoId = inVideo.id
@@ -66,6 +67,8 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
         langCode = subtitle.languageCode
 
         videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
+            'voteCount':
+                getVoteCount(subtitle),
             'hasKnownWordsIndexList':
                 bool(subtitle.knownWordsIndexList),
             'voted':
@@ -82,11 +85,22 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
                 language.getLongLanguageName(langCode),
         }
 
+        if not userDB:
+            continue
+
+        vote = models.Vote.query.filter_by(user=userDB, subtitle=subtitle).first()
+
+        if not vote:
+            continue
+
+        videoDict[youtube.SUBTITLES_KEY_NAME][langCode]['userVote'] = vote.upvote
+
     return videoDict
 
 def getVideoPreviewsInfo(inByLanguages    = None ,
                          inLimitLanguages = None ,
-                         inLimitVideos    = constant.constants.RECCOMMENDATIONS_LIMIT ):
+                         inLimitVideos    = constant.constants.RECCOMMENDATIONS_LIMIT ,
+                         inUserDB         = None ):
     '''
     Args:
         inByLanguages (list[models.Language]): List of languages' subtitles to retrieve from a video if any.
@@ -107,7 +121,8 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
 
             videos.append( getVideoPreviewInfoFromDB( videoDB                               ,
                                                       inLanguageCodes  = languageShortCodes ,
-                                                      inLimitLanguages = inLimitLanguages   ) )
+                                                      inLimitLanguages = inLimitLanguages   ,
+                                                      userDB           = inUserDB           ) )
 
     else:
         '''
@@ -194,6 +209,11 @@ def getVideoInfo(inYoutubeId,
 
     else:
         return youtube.getVideoInfo(inYoutubeId)
+
+
+def getVoteCount(inSubtitleDB):
+    voteValues = [vote.upvote for vote in inSubtitleDB.all_sub_votes]
+    return voteValues.count(True) - voteValues.count(False)
 
 def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
     '''Store a video and all its subtitle tracks into the DB.

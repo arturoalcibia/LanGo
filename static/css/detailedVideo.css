@@ -1,0 +1,14 @@
+.vote{
+  background-color: transparent;
+  border: transparent;
+}
+
+.upvoted{
+  background: blue;
+  color: white;
+}
+
+.downvoted{
+  background: red;
+  color: white;
+}
