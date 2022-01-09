@@ -208,7 +208,12 @@ def getVideoInfo(inYoutubeId,
         return videoInfoDict
 
     else:
-        return youtube.getVideoInfo(inYoutubeId)
+
+        if inForceDBUse:
+            return
+
+        return youtube.getVideoInfo(inYoutubeId,
+                                    inLanguageCodes=inLanguageCodes)
 
 
 def getVoteCount(inSubtitleDB):
@@ -239,8 +244,6 @@ def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
 
     for languageCode, subDict in videoInfo[youtube.SUBTITLES_KEY_NAME].items():
 
-        subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-
         languageDB = models.Language.query.get(languageCode.split('-')[0])
 
         if not languageDB:
@@ -249,7 +252,11 @@ def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
                 inYoutubeId))
             continue
 
-        inSubtitleKwargs = {}
+        subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
+
+        # TODO: Define per language!
+        for subDict in subList:
+            subDict['text'] = language.stripPunctuation(subDict['text'])
 
         if inLookUpDictionary:
             pass
@@ -259,8 +266,7 @@ def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
             languageCode=languageCode,
             text=json.dumps(subList),
             videoIdLink=videoDB,
-            languageLink=languageDB,
-            **inSubtitleKwargs)
+            languageLink=languageDB)
 
         db.session.add(subTrackDB)
 

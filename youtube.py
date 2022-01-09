@@ -72,14 +72,12 @@ def getVideoBasicInfo(inVideoId):
 
 @functools.lru_cache(maxsize=None)
 def getVideoInfo(inYoutubeId,
-                 inLanguageCode=None,
-                 inOnlyManualSubtitlesBool=True):
+                 inLanguageCodes=None):
     '''Checks if passed youtube Id is valid. Returns a video's information.
 
     Args:
         inYoutubeId (str): video Id.
         inLanguageCode (str): Language code to check if available as a subtitle. If not, return None.
-        inOnlyManualSubtitlesBool (str): Retrieve only manually created subtitles. todo!
 
     Returns:
 
@@ -109,19 +107,19 @@ def getVideoInfo(inYoutubeId,
     except youtube_transcript_api._errors.TranscriptsDisabled:
         return
 
-    manuallyCreatedTranscriptsDict = transcripts._manually_created_transcripts
+    videoInfoDict[SUBTITLES_KEY_NAME] = {}
 
-    if inOnlyManualSubtitlesBool:
+    for langCode, transcriptObj in transcripts._manually_created_transcripts.items():
 
-        if not manuallyCreatedTranscriptsDict:
-            return
+        if inLanguageCodes and langCode not in inLanguageCodes:
+            continue
 
-        if inLanguageCode and inLanguageCode not in manuallyCreatedTranscriptsDict.keys():
-            return
+        subList = transcriptObj.fetch()
 
-    videoInfoDict[SUBTITLES_KEY_NAME] = {key:{TRANSCRIPT_OBJ_KEY_NAME:transcriptObj}
-                                         for key, transcriptObj
-                                         in manuallyCreatedTranscriptsDict.items()}
+        for subDict in subList:
+            subDict['text'] = language.stripPunctuation(subDict['text'])
+
+        videoInfoDict[SUBTITLES_KEY_NAME][langCode] = {TRANSCRIPT_TEXT_KEY_NAME: subList}
 
     return videoInfoDict
 

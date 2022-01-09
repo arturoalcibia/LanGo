@@ -1,3 +1,11 @@
+#player { display: block; margin: 20px auto; width: 100%; max-width: 600px; }
+
+iframe {
+  width: 100%;
+  position: relative;
+  top: 0;
+  left: 0; }
+
 .exercise {
   padding: 4rem;
 }

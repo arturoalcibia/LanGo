@@ -22,6 +22,7 @@ function __setCachedAnswers(){
       continue
 
     inputSub.value = cachedInputSub;
+    __validateAnswer(inputSub);
   }
 
 }
@@ -62,7 +63,7 @@ function __isCorrectAnswer(inStr, inStr2, isSimpleMode){
     return __isNonAsciiEqual(inStr, inStr2)
 }
 
-function __validateAnswer(inInputBox){
+function __validateAnswer(inInputBox, inSkipLocalStorage=false){
   correctAnswer = inInputBox.dataset.text;
   isCorrect = false;
 
@@ -81,6 +82,9 @@ function __validateAnswer(inInputBox){
     inInputBox.classList.add('incorrectInput')
     inInputBox.classList.remove('correctInput')
   }
+
+  if (inSkipLocalStorage)
+    return
 
   localStorage.setItem(`${videoId}.${inInputBox.id}`, inInputBox.value);
 

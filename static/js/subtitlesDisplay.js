@@ -1,8 +1,6 @@
 // Query all subs
 var subtitlesDiv = document.getElementsByClassName('sub');
 
-
-
 // Amount in Miliseconds.
 const handleMiliSeconds = 500;
 const handleSeconds = handleMiliSeconds * 0.001;
@@ -37,6 +35,7 @@ function ___answer(){
       childInput = childInputs[j];
       childInput.classList.add('correctInput');
       childInput.classList.remove('incorrectInput');
+      childInput.value = childInput.dataset.text;
     }
   }
 

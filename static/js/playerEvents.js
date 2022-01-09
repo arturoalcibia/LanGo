@@ -54,6 +54,7 @@ function onStateChange(event) {
             }
             InitialInstructionDiv.classList.add('hidden');
             hideVideo()
+            player.seekTo(0);
             firstTimePlaying = false;
         }
 

@@ -3,6 +3,11 @@
 <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='styles/input.css') }}">
 
 <div class="exercise">
+
+    <div >
+        <p>{{ videoInfo['title'] }}</p>
+    </div>
+
     <div id="scoreDiv">
         <span>Score: </span><span id="scoreInt"></span><span id="scoreTotal"></span>
     </div>

@@ -180,7 +180,7 @@ def exercise(videoId=None,
 
     videoInfo = api.getVideoInfo(videoId,
                                  exerciseType,
-                                 inLanguageCodes=[languageCode],
+                                 inLanguageCodes=(languageCode,),
                                  inForceDBUse=current_user.is_anonymous)
 
     return render_template(

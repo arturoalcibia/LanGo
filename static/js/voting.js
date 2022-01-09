@@ -4,7 +4,6 @@ function vote(inId, inVoteValueStr) {
 
                 var voteSpan = $('#voteSpan_' + inId);
                 var originalScore = Number(voteSpan.data('original-score'));
-                console.log(originalScore)
 
                 if (inVoteValueStr === 'upvote')
                     var currentBtn = $('#upvoteButton_' + inId);

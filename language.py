@@ -1,3 +1,5 @@
+import string
+
 import constant.spanish
 from constant import constants
 
@@ -132,3 +134,6 @@ def getShort(inCode):
 
     else:
         return inCode
+
+def stripPunctuation(inSentenceStr):
+    return inSentenceStr.translate(str.maketrans('', '', string.punctuation))
