@@ -4,6 +4,8 @@ const hideBtnDiv = document.getElementById('hideBtnDiv');
 const buttonsDiv = document.getElementById('buttonsDiv');
 const settingsDiv = document.getElementById('settingsDiv');
 
+const ytPlayerDiv = document.getElementById('ytplayerdiv');
+
 const divsToHide = [scoreDiv, hideBtnDiv, buttonsDiv, settingsDiv]
 
 const InitialInstructionDiv = document.getElementById('InitialInstructionDiv');
@@ -68,8 +70,8 @@ function onStateChange(event) {
 }
 
 function hideVideo(){
-    if (ytplayer.classList.contains('hidden'))
-        ytplayer.classList.remove('hidden')
+    if (ytPlayerDiv.classList.contains('hidden'))
+        ytPlayerDiv.classList.remove('hidden')
     else
-        ytplayer.classList.add('hidden')
+        ytPlayerDiv.classList.add('hidden')
 }

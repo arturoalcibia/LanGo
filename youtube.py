@@ -24,10 +24,7 @@ EXERCISE_URL_KEY_NAME = 'exerciseUrl'
 
 EXERCISE_FILL_ALL_URL_KEY_NAME = 'exerciseFillAllUrl'
 
-EXERCISE_FILL_KNOWN_URL_KEY_NAME = 'exerciseFillKnownUrl'
-
-EXERCISE_TYPES = (EXERCISE_FILL_KNOWN_URL_KEY_NAME,
-                  EXERCISE_FILL_ALL_URL_KEY_NAME)
+EXERCISE_TYPES = (EXERCISE_FILL_ALL_URL_KEY_NAME,)
 
 VIDEO_URL_KEY_NAME = 'videoUrl'
 
@@ -139,44 +136,3 @@ def getVideoId(inUrl):
         return
 
     return urlMatch.group('code')  # Ex: cAoR6FUE0kk
-
-@functools.lru_cache(maxsize=None)
-def search(inSearchStr,
-           inLanguageCode=None,
-           inRetryLimit=constants.RETRY_LIMIT,
-           inSearchLimit=constants.SEARCH_LIMIT):
-    '''Browse for youtube videos.
-
-    Args:
-         inSearchStr (str): Query str to search.
-         inLanguageCode (str): Only display videos with subtitle tracks on the provided language.
-         inSearchLimit (int): Number of searches to display,
-            won't neccesarily be fulfilled if it goes above the retry limit.
-         inRetryLimit (int): Number of retries until the search limit is fulfilled.
-
-    Returns:
-        #todo!
-    '''
-    searchResults = []
-    retryCounter = 0
-
-    ytSearch = CustomSearch(inSearchStr, 'EgQQASgB', limit=1)
-
-    while len(searchResults) < inSearchLimit or retryCounter < inRetryLimit:
-        for videoInfoDict in ytSearch.result()['result']:
-
-            getVideoInfoKwargs = {}
-
-            if inLanguageCode:
-                getVideoInfoKwargs['inLanguageCode'] = inLanguageCode
-
-            videoInfo = getVideoInfo(videoInfoDict['id'],
-                                     **getVideoInfoKwargs)
-
-            if videoInfo:
-                searchResults.append(videoInfo)
-
-        retryCounter += 1
-        ytSearch.next()
-
-    return searchResults

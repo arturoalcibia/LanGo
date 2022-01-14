@@ -2,6 +2,17 @@ from app import db, login
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
+playlists_content = db.Table(
+    'playlists_content',
+    db.Column('playlist_id', db.Integer, db.ForeignKey('playlist.id')),
+    db.Column('subtitle_id', db.Integer, db.ForeignKey('subtitle.id'))
+    )
+
+class Playlist(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(64), index=True, unique=True)
+    subtitles = db.relationship('Subtitle', secondary=playlists_content, backref='subtitle_playlists', lazy='dynamic')
+
 class Language(db.Model):
     shortCode = db.Column(db.String(2), primary_key=True)
     userId = db.Column(db.String, db.ForeignKey('user.id'))
@@ -10,7 +21,7 @@ class Language(db.Model):
     def __repr__(self):
         return '<Language {}>'.format(self.shortCode)
 
-
+#todo! hasn't been implemented!
 class Score(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     userId = db.Column(db.Integer, db.ForeignKey('user.id'))
@@ -42,7 +53,7 @@ class Subtitle(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     languageCode = db.Column(db.String(4), index=True)
     text = db.Column(db.Text())
-    knownWordsIndexList = db.Column(db.Text(), nullable=True)
+    knownWordsIndexList = db.Column(db.Text(), nullable=True) #todo! Not needed anymore!! remove all traces!
     isDefault = db.Column(db.Boolean())
     videoId    = db.Column(db.String, db.ForeignKey('video.id'))
     language_id = db.Column(db.String, db.ForeignKey('language.shortCode'))

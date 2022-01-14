@@ -7,10 +7,7 @@ from flask import url_for, flash, request, jsonify
 from flask_login import LoginManager
 from flask_login import login_user, current_user, login_required
 
-from constant import constants
-from forms.searchVideo import SearchVideoForm
 from forms.videoUrl import VideoUrlForm
-from forms.submitExercise import SubmitExerciseForm
 from forms.login import LoginForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -75,49 +72,6 @@ def index():
 
     return render_template("index.html", videos=videos)
 
-@app.route('/browse/<query>/<languageCode>', methods=("GET", "POST"))
-@app.route('/browse/<query>/', methods=("GET", "POST"))
-@app.route('/browse/', methods=("GET", "POST"))
-def browse(query=None,
-           languageCode=None):
-    '''If guest:  let them browse videos.
-
-    elif user: All of the above plus >
-        - Let them browse popular playlists.
-        - Create playlists
-
-    TODO!!!!
-    '''
-
-    searchVideoForm = SearchVideoForm()
-    languagesNames = list(constants.LANGUAGE_ISO_CODE_MAPPING.keys())
-
-    if searchVideoForm.validate_on_submit():
-        searchQueryData = searchVideoForm.searchQuery.data
-        languageData = searchVideoForm.language.data
-        languageCode = constants.LANGUAGE_ISO_CODE_MAPPING.get(languageData)
-
-        if languageCode:
-            return redirect(url_for('browse', query=searchQueryData, languageCode=languageCode))
-        else:
-            return redirect(url_for('browse', query=searchQueryData))
-
-    if query is None:
-        return render_template('browse.html',
-                               languages=languagesNames,
-                               searchVideoForm=searchVideoForm)
-
-    #todo! change to api!
-    if languageCode is not None:
-        searchResults = youtube.search(query, inLanguageCode=languageCode)
-    else:
-        searchResults = youtube.search(query)
-
-    return render_template('browse.html',
-                           searchVideoForm=searchVideoForm,
-                           searchResults=searchResults,
-                           languageCode=languageCode,
-                           languages=languagesNames)
 
 @app.route('/browseurl/', methods=("GET", "POST"))
 @app.route('/browseurl/<videoId>', methods=("GET", "POST"))
@@ -142,6 +96,11 @@ def browseUrl(videoId=None):
                                videoInfo=videoInfo)
 
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
+
+@app.route('/orderExercise/')
+def orderExercise():
+    return render_template('_orderExercise.html')
+
 
 @app.route('/exercise/')
 @app.route('/exercise/<videoId>')
@@ -290,8 +249,40 @@ def make_shell_context():
             youtubeId = youtube.getVideoId(youtubeLink)
             api.storeVideoInfo(youtubeId)
 
-    return { 'db': db            ,
-             'i': initDatabase() ,
+    def createPlaylist():
+        import models
+        a = models.Subtitle.query.get(1)
+        b = models.Subtitle.query.get(2)
+
+        playlistA = models.Playlist(title='Quebec prqacgrticedd')
+        db.session.add(playlistA)
+        db.session.commit()
+
+        playlistA.subtitles.append(a)
+        playlistA.subtitles.append(b)
+        db.session.commit()
+
+        playlistB = models.Playlist(title='BC prfagrcticeddd')
+        db.session.add(playlistB)
+        db.session.commit()
+
+        playlistB.subtitles.append(a)
+        db.session.commit()
+
+        playlist = models.Playlist.query.get(1)
+        playlistf = models.Playlist.query.get(2)
+
+        exit()
+
+
+    def all():
+        initDatabase()
+        createPlaylist()
+
+    return { 'db': db              ,
+             'i': initDatabase     ,
+             'f': createPlaylist ,
+             'g': all()             ,
              #'e': exit()
                                  }
 

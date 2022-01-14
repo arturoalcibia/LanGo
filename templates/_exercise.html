@@ -20,7 +20,9 @@
         <span id="initialInstructionSpan">Click play video to start!</span>
     </div>
 
-    <div id="ytplayer"></div>
+    <div id="ytplayerdiv" class="responsive-video">
+        <div id="ytplayer"></div>
+    </div>
 
     <div id="buttonsDiv">
         <input type="button" value="Previous subtitle" id="previousSubtitleBtn"/>
@@ -35,26 +37,13 @@
     {% for subDict in subList %}
         <div class="sub" data-start="{{ subDict["start"] }}" data-end="{{ (subDict["duration"] + subDict["start"])|round(2) }}">
             <span class="subId">"{{ loop.index }}"</span>
-            {% if exerciseType == 'exerciseFillKnownUrl' %}
-                {% set wordsToIterate = subDict["text"] %}
-            {% elif exerciseType == 'exerciseFillAllUrl' %}
-                {% set wordsToIterate = subDict["text"].split(' ') %}
-            {% endif %}
+            {% set wordsToIterate = subDict["text"].split(' ') %}
             {% for textTuple in wordsToIterate %}
-                {% if exerciseType == 'exerciseFillKnownUrl' %}
-                    {% if textTuple[1] %}
-                        <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple[0] }}" autocomplete="off" size="{{ textTuple[0] }}"/>
-                        {% set inputIdCount.value = inputIdCount.value + 1 %}
-                    {% else %}
-                        <span class="textSub">{{ textTuple[0] }}</span>
-                    {% endif %}
+                {% if loop.first or loop.last %}
+                    <span class="textSub">{{ textTuple }}</span>
                 {% else %}
-                    {% if loop.first or loop.last %}
-                        <span class="textSub">{{ textTuple }}</span>
-                    {% else %}
-                        <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple }}" autocomplete="off" size="{{ textTuple|length }}" />
-                        {% set inputIdCount.value = inputIdCount.value + 1 %}
-                    {% endif %}
+                    <input id="{{ inputIdCount.value }}" class='inputSub incorrectInput' type="text" data-text="{{ textTuple }}" autocomplete="off" size="{{ textTuple|length }}" />
+                    {% set inputIdCount.value = inputIdCount.value + 1 %}
                 {% endif %}
             {% endfor %}
             <br>
@@ -80,7 +69,7 @@
 </script>
 
 <script type="text/javascript">
-    const subtitlesAmount = {{ 2 if exerciseType == 'exerciseFillKnownUrl' else 0 }}
+    const subtitlesAmount = 0;
 </script>
 
 <script type="text/javascript" src="{{ url_for('static', filename="js/subtitlesDisplay.js") }}"></script>

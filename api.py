@@ -77,8 +77,6 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
                 url_for('exercise', videoId=videoId, languageCode=langCode),
             youtube.EXERCISE_FILL_ALL_URL_KEY_NAME:
                 url_for('exercise', videoId=videoId, languageCode=langCode, exerciseType=youtube.EXERCISE_FILL_ALL_URL_KEY_NAME),
-            youtube.EXERCISE_FILL_KNOWN_URL_KEY_NAME:
-                url_for('exercise', videoId=videoId, languageCode=langCode, exerciseType=youtube.EXERCISE_FILL_KNOWN_URL_KEY_NAME),
             'id':
                 subtitle.id,
             youtube.LONG_LANGUAGE_KEY_NAME:
@@ -146,7 +144,6 @@ def getVideoPreviewsInfo(inByLanguages    = None ,
 
 
 def getVideoInfo(inYoutubeId,
-                 inExerciseType,
                  inLanguageCodes=None,
                  inForceLongCode=True,
                  inForceDBUse=True):
@@ -220,7 +217,7 @@ def getVoteCount(inSubtitleDB):
     voteValues = [vote.upvote for vote in inSubtitleDB.all_sub_votes]
     return voteValues.count(True) - voteValues.count(False)
 
-def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
+def storeVideoInfo(inYoutubeId):
     '''Store a video and all its subtitle tracks into the DB.
 
     If the youtubeId already exists in the DB as the id on the Video table. it will skip.
@@ -252,15 +249,7 @@ def storeVideoInfo(inYoutubeId, inLookUpDictionary=True):
                 inYoutubeId))
             continue
 
-        subList = subDict[youtube.TRANSCRIPT_OBJ_KEY_NAME].fetch()
-
-        # TODO: Define per language!
-        for subDict in subList:
-            subDict['text'] = language.stripPunctuation(subDict['text'])
-
-        if inLookUpDictionary:
-            pass
-            #todo!
+        subList = subDict[youtube.TRANSCRIPT_TEXT_KEY_NAME]
 
         subTrackDB = models.Subtitle(
             languageCode=languageCode,

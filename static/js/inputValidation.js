@@ -10,18 +10,23 @@ var scoreInt = document.getElementById('scoreInt');
 const scoreTotal = document.getElementById('scoreTotal');
 
 __setScoreStr();
+
+// todo: Improve performance
 __setCachedAnswers();
 
 function __setCachedAnswers(){
 
   for (let i = 0; i < inputSubtitles.length; i++) {
     inputSub = inputSubtitles[i];
+
     cachedInputSub = localStorage.getItem(`${videoId}.${inputSub.id}`)
 
     if (cachedInputSub === null)
       continue
 
     inputSub.value = cachedInputSub;
+    continue;
+
     __validateAnswer(inputSub);
   }
 

@@ -1,10 +1,19 @@
-#player { display: block; margin: 20px auto; width: 100%; max-width: 600px; }
+.responsive-video {
+    position: relative;
+    padding-bottom: 56.25%; /*Set based on the videos aspect ratio. If the aspect ratio is 16:9 set
+    the padding bottom to 56.25%. If the video aspect ration is 4:3, set padding-bottom to 75% */
+    padding-top: 35px; /*Height of the youtube video header*/
+    height: 0; /* Not needed as the iframe derives the height from the padding bottom */
+    overflow: hidden; /*hides if any of the video escapes outside the container*/
+}
 
-iframe {
-  width: 100%;
-  position: relative;
-  top: 0;
-  left: 0; }
+.responsive-video iframe {
+    width: 90%; /*make sure video takes up 100% of the width*/
+    height: 90%;/*make sure video takes up 100% of the height*/
+    position: absolute; /*required because container has a height of 0*/
+    left: 0; /* correct the positioning */
+    top: 0; /* correct the positioning */
+}
 
 .exercise {
   padding: 4rem;
