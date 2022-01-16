@@ -106,6 +106,9 @@ def getVideoInfo(inYoutubeId,
 
     videoInfoDict[SUBTITLES_KEY_NAME] = {}
 
+    print(transcripts._manually_created_transcripts.keys())
+    print(inLanguageCodes)
+
     for langCode, transcriptObj in transcripts._manually_created_transcripts.items():
 
         if inLanguageCodes and langCode not in inLanguageCodes:
@@ -113,8 +116,11 @@ def getVideoInfo(inYoutubeId,
 
         subList = transcriptObj.fetch()
 
-        for subDict in subList:
+        for index, subDict in enumerate(subList):
             subDict['text'] = language.stripPunctuation(subDict['text'])
+            subDict["end"] = round(subDict["start"] + subDict["duration"], 2)
+            subDict["index"] = index
+
 
         videoInfoDict[SUBTITLES_KEY_NAME][langCode] = {TRANSCRIPT_TEXT_KEY_NAME: subList}
 

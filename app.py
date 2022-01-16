@@ -1,4 +1,4 @@
-####### todo!!!: add languages to profile sign up/ profile page!
+import json
 
 from flask import Flask
 from flask import redirect
@@ -98,9 +98,21 @@ def browseUrl(videoId=None):
     return render_template('browseUrl.html', videoUrlForm=videoUrlForm)
 
 @app.route('/orderExercise/')
-def orderExercise():
-    return render_template('_orderExercise.html')
+@app.route('/orderExercise/<videoId>')
+@app.route('/orderExercise/<videoId>/<languageCode>')
+def orderExercise(videoId=None,
+                  languageCode=None):
 
+    videoInfo = api.getVideoInfo(videoId,
+                                 inLanguageCodes=(languageCode,),
+                                 inForceDBUse=current_user.is_anonymous)
+
+    return render_template(
+        '_orderExercise.html',
+        videoId=videoId,
+        languageCode=languageCode,
+        subList=json.dumps(videoInfo[youtube.SUBTITLES_KEY_NAME].get(languageCode)[youtube.TRANSCRIPT_TEXT_KEY_NAME]),
+        videoInfo=videoInfo)
 
 @app.route('/exercise/')
 @app.route('/exercise/<videoId>')
@@ -108,7 +120,7 @@ def orderExercise():
 @app.route('/exercise/<videoId>/<languageCode>/<exerciseType>')
 def exercise(videoId=None,
              languageCode=None,
-             exerciseType=None):
+             exerciseType=None,):
     '''
     '''
 
@@ -280,9 +292,9 @@ def make_shell_context():
         createPlaylist()
 
     return { 'db': db              ,
-             'i': initDatabase     ,
+             'i': initDatabase()     ,
              'f': createPlaylist ,
-             'g': all()             ,
+             'g': all             ,
              #'e': exit()
                                  }
 

@@ -29,7 +29,7 @@ body {
 	 padding: 2rem;
 	 border: 1px solid #596265;
 	 border-radius: 1rem;
-	 width: 350px;
+	 width: 90%;
 	 max-width: 100%;
 }
 .destination {
@@ -49,7 +49,7 @@ body {
 	 flex-flow: row wrap;
 	 justify-content: center;
 	 align-items: flex-start;
-	 max-width: 275px;
+	 max-width: 70%;
 	 margin: 0 auto;
 }
 .container {
@@ -79,4 +79,44 @@ body {
 .word:active {
 	 transition: 0.25s ease;
 	 transform: scale(1.05, 1.05) translateY(-0.25rem);
+}
+
+.wordNeutral {
+	 background: #122023;
+}
+
+.wordCorrectOrder {
+	 background: #67974d;
+}
+
+.wordIncorrectOrder {
+	 background: #a39470;
+}
+
+.wordIncorrect {
+	 background: #a05656;
+}
+
+.responsive-video {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  padding-top: 56.25%;
+
+}
+
+.responsive-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 40%;
+  height: 40%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hidden{
+    display: none;
 }

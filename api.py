@@ -69,8 +69,6 @@ def getVideoPreviewInfoFromDB( inVideo                 ,
         videoDict[youtube.SUBTITLES_KEY_NAME][langCode] = {
             'voteCount':
                 getVoteCount(subtitle),
-            'hasKnownWordsIndexList':
-                bool(subtitle.knownWordsIndexList),
             'voted':
                 True,
             youtube.EXERCISE_URL_KEY_NAME:

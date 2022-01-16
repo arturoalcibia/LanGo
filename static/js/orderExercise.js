@@ -1,122 +1,168 @@
-const destination = document.querySelector(".destination"); // container where selected words go
-const origin = document.querySelector(".origin"); // container where words initially start
-const clearTest = document.getElementById('test');
+var firstTimePlaying = true;
+var intervals = [];
 
-let isAnimating = false; // bool to prevent competing animations (clicking a word before the previous word has finished moving)
+var endAt = null;
+var currentIndex = null;
+var currentSentenceSplitted = [];
 
-// FLIP technique animation (First Last Invert Play)
-const flip = (word, settings) => {
-	// calculate the difference in position between where the word started and where it ended (First - Last = Invert)
-	const invert = {
-		x: settings.first.left - settings.last.left,
-		y: settings.first.top - settings.last.top
-	};
+var player;
 
-	// do the animation (Play) from the original (Invert) position to the final current position
-	let animation = word.animate(
-		[
-			{ transform: `scale(1,1) translate(${invert.x}px, ${invert.y}px)` },
-			{ transform: `scale(1,1) translate(0, 0)` }
-		],
-		{
-			duration: 300,
-			easing: "ease"
-		}
-	);
-
-	// signify that animation has completed
-	animation.onfinish = () => (isAnimating = false);
+var playerConfig = {
+  videoId: videoId,
+  playerVars: {
+    autoplay: 0, // Auto-play the video on load
+    mute: 0, // Auto-play the video on loa
+    controls: 1, // Show pause/play buttons in player
+    showinfo: 0, // Hide the video title
+    modestbranding: 1, // Hide the Youtube Logo
+    rel: 1, // Hide related videos on pause/end video
+    fs: 1, // Hide the full screen button
+    cc_load_policy: 1, // Hide closed captions
+    iv_load_policy: 3, // Hide the Video Annotations
+    start: 0,
+    autohide: 0, // Hide video controls when playing
+  },
+  events: {
+    'onStateChange': onStateChange,
+  }
 };
 
-// move the word from the origin to the destination
-const move = (word) => {
-	const id = Math.random(); // random number used to link the word to its container (used in the putback function)
-	const container = word.closest(".container"); // the selected word's container element
-	let rect = word.getBoundingClientRect(); // selected word's DOM rect
-	let first, last; // containers for the initial and final (First and Last) positions of the element
+function onYouTubePlayerAPIReady() {
+  player = new YT.Player('ytplayer', playerConfig);
+}
 
-	isAnimating = true; //signify an animation has started (or is about to)
+// Inject YouTube API script
+var tag = document.createElement("script");
+tag.src = "//www.youtube.com/player_api";
+var firstScriptTag = document.getElementsByTagName("script")[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-	// give both the container and the word a data-id (used in the putback function) (using data-id and not a var because you can query for a data-attribute)
-	container.dataset.id = id;
-	word.dataset.id = id;
+function __clearIntervals(){
+  for (let i = 0; i < intervals.length; i++) { clearInterval( intervals[i] ); }
+}
 
-	// set the container to the heighth width of the word (so it stays visible when empty)
-	container.style.height = `${word.offsetHeight}px`;
-	container.style.width = `${word.offsetWidth}px`;
+function __restoreInterval(inAfterXMiliSeconds=0){
+  setTimeout(function () {
+        intervals.push(setInterval(stopVideoAtEnd, 100));
+    }, inAfterXMiliSeconds);
+}
 
-	// assign the initial top/left px values of the word -> move the word to the destination -> recaculate the the word's DOM rect in new position -> assign the final top/left values
-	first = { top: rect.top, left: rect.left };
-	destination.insertAdjacentElement("beforeend", word);
-	rect = word.getBoundingClientRect();
-	last = { top: rect.top, left: rect.left };
+function shuffle(a) {
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+}
 
-	// send word, and its caculated vales to the flip funciton
-	flip(word, { first, last });
+function onStateChange(event) {
+
+  var playerState = event.data;
+
+  if (playerState === YT.PlayerState.PLAYING) {
+
+      if (firstTimePlaying) {
+          document.getElementById('InitialInstructionDiv').classList.add('hidden');
+          document.getElementById('ytplayerdiv').classList.add('hidden');
+          document.getElementById('words').classList.remove('hidden');
+          firstTimePlaying = false;
+          setSubtitle();
+      }
+
+   __restoreInterval(500)
+
+    }
+    else {
+        __clearIntervals();
+    }
+
+}
+
+function stopVideoAtEnd(){
+
+    if (player.getCurrentTime() >= endAt){
+        player.pauseVideo();
+        endAt = null;
+    }
+}
+
+function setSubtitle(inCurrentIndex=null) {
+
+    // Set first subtitle to play.
+    if (inCurrentIndex === null){
+      inCurrentIndex = 0;
+    }
+
+    newCurrentSubtitle = subtitles[inCurrentIndex]
+    currentIndex = inCurrentIndex;
+
+    player.seekTo(newCurrentSubtitle['start']);
+
+    if (player.state !== YT.PlayerState.PLAYING){
+        player.playVideo();
+    }
+
+    endAt = newCurrentSubtitle['end'];
+
+    destination.innerHTML = "";
+    origin.innerHTML = "";
+
+    var words = newCurrentSubtitle['text'].split(' ')
+    currentSentenceSplitted =  [...words];
+    shuffle(words);
+
+    words.forEach(function (wordStr, index) {
+
+      let wordDiv = document.createElement("div");
+      wordDiv.classList.add('container');
+
+      let wordSpan = document.createElement("span");
+      wordSpan.textContent = wordStr;
+      wordSpan.dataset.index = index;
+      wordSpan.classList.add('word');
+      wordSpan.classList.add('wordNeutral');
+
+      wordDiv.append(wordSpan);
+      origin.append(wordDiv);
+
+      origin.querySelectorAll(".word").forEach((word) => { convert(word); });
+
+    });
+
+}
+
+document.getElementById('skipBtn').onclick = function () {
+    currentIndex = currentIndex + 1;
+    setSubtitle(currentIndex);
 };
 
-const putback = (word) => {
-	const id = word.dataset.id; // get the ID of the current word
-	const container = origin.querySelector(`[data-id="${id}"]`); // query for the container w/ the matching ID
-	const siblings = [...destination.querySelectorAll(".word")].filter(
-		(sib) => sib !== word
-	); // find the other word elements in the destination so we can animate them when the selected word is put back
-
-	let rect = word.getBoundingClientRect(); // selected word's DOM rect
-	let first, last; // containers for the initial and final (First and Last) positions of the element
-
-	isAnimating = true; //signify an animation has started (or is about to)
-
-	first = { top: rect.top, left: rect.left }; // assign the initial top/left px values
-
-	// get the initial top/left px values for each sibling
-	siblings.forEach((sib) => {
-		let rect = sib.getBoundingClientRect();
-		// I am assigning this value as a property of the element object because trying to keep a
-		// variable linked to this element inside a loop that we can use later in a different loop
-		// would be a real big pain. Best practice is not to modify objects/classes you don't own,
-		// so to be safe and avoid overwriting an existing property value (ele.first or ele.last)
-		// I am prefixing the property name with __
-		sib.__first = { top: rect.top, left: rect.left };
-	});
-
-	container.insertAdjacentElement("beforeend", word); //move the word from the destination back to its original container
-
-	rect = word.getBoundingClientRect(); // selected word's new DOM rect
-	last = { top: rect.top, left: rect.left }; // assign the final top/left px values
-
-	// get the final top/left px values for each sibling
-	siblings.forEach((sib) => {
-		let rect = sib.getBoundingClientRect();
-		sib.__last = { top: rect.top, left: rect.left };
-	});
-
-	flip(word, { first, last }); // animate the word
-
-	siblings.forEach((sib) => flip(sib, { first: sib.__first, last: sib.__last })); // animate the siblings
-
-	// clean up the junk we added during the move function()
-	container.style.height = "";
-	container.style.width = "";
-	container.removeAttribute("data-id");
-	word.removeAttribute("data-id");
+document.getElementById('playBtn').onclick = function () {
+    endAt = subtitles[currentIndex]['end']
+    player.seekTo(subtitles[currentIndex]['start']);
+    player.playVideo();
 };
 
-const convert = (word) => {
-	const event = () => {
-		if (isAnimating) return; // if we already have an animation playing, don't let the user start a new one
-		word.closest(".container") ? move(word) : putback(word); // decide if we should use the move() or putback() functions based on the word's current location
-	};
+document.getElementById('checkBtn').onclick = function () {
 
-	word.addEventListener("mouseup", event);
-	word.addEventListener("touchend", event);
-};
+    const words = destination.querySelectorAll(".word");
 
-// add a conditional eventListener to each word
-origin.querySelectorAll(".word").forEach((word) => { convert(word); });
+    words.forEach(function (wordSpan, index) {
 
-clearTest.onclick = function () {
-	destination.innerHTML = "";
-	origin.innerHTML = '<div class=\"container\"><span class=\"word\">jajaja</span></div>';
-	origin.querySelectorAll(".word").forEach((word) => { convert(word); });
+        wordSpan.className = 'word';
+        console.log(currentSentenceSplitted)
+
+        const wordStr = wordSpan.textContent;
+
+        if (wordStr === currentSentenceSplitted[index]){
+            wordSpan.classList.add('wordCorrectOrder')
+        }
+        else if (currentSentenceSplitted.includes(wordStr)){
+            wordSpan.classList.add('wordIncorrectOrder')
+        }
+        else {
+            wordSpan.classList.add('wordIncorrect')
+        }
+
+    });
+
 };
